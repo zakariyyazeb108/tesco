@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Full-Stack Web Dev Tutorial: React, Node.js &amp; SQLite Grocery App</title>
+<title>Full-Stack Web Dev Tutorial: React, Node.js &amp; SQLite</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8f9fb;color:#1e293b;line-height:1.7}
@@ -37,7 +37,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <body>
 
 <div class="header">
-<h1>Full-Stack Web Development Tutorial: Online Grocery Store</h1>
+<h1>Full-Stack Web Development Tutorial: Sample Catalog App</h1>
 <span>React + Node.js + SQLite</span>
 </div>
 
@@ -145,9 +145,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div class="file-block">
 <div class="file-header"><span class="file-path">backend/package.json</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
 <textarea readonly rows="16">{
-  "name": "freshmart-backend",
+  "name": "catalog-api-backend",
   "version": "1.0.0",
-  "description": "FreshMart grocery store API",
+  "description": "Demo REST API for coursework",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -172,7 +172,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 const fs = require('fs');
 const path = require('path');
 
-const DB_PATH = path.join(__dirname, 'grocery.db');
+const DB_PATH = path.join(__dirname, 'catalog.db');
 
 let db;
 
@@ -355,7 +355,7 @@ async function startServer() {
   app.use('/api/users', userRoutes);
 
   app.get('/', (req, res) => {
-    res.json({ message: 'FreshMart API is running' });
+    res.json({ message: 'Demo API running' });
   });
 
   app.listen(PORT, () => {
@@ -395,50 +395,50 @@ async function seed() {
   );
 
   const products = [
-    ['Royal Gala Apples', 2.00, 'Fruit & Veg', '🍎', 'Pack of 6 sweet and crispy apples'],
-    ['Bananas Loose', 0.75, 'Fruit & Veg', '🍌', 'Sold per kg, perfect ripeness'],
-    ['Carrots 1kg', 0.55, 'Fruit & Veg', '🥕', 'Fresh British carrots'],
-    ['Broccoli', 0.69, 'Fruit & Veg', '🥦', 'Tender green florets'],
-    ['Red Grapes 500g', 2.25, 'Fruit & Veg', '🍇', 'Sweet seedless grapes'],
-    ['Blueberries 150g', 2.50, 'Fruit & Veg', '🫐', 'Plump and juicy berries'],
-    ['Oranges 5pk', 1.80, 'Fruit & Veg', '🍊', 'Juicy navel oranges'],
-    ['Iceberg Lettuce', 0.65, 'Fruit & Veg', '🥬', 'Crisp and fresh'],
+    ['LED Desk Lamp', 2.00, 'Electronics', '💡', 'Adjustable brightness desk lamp'],
+    ['Wireless Mouse', 0.75, 'Electronics', '🖱️', 'Compact optical mouse'],
+    ['USB-C Cable 2m', 0.55, 'Electronics', '🔌', 'Braided charging cable'],
+    ['HD Webcam', 0.69, 'Electronics', '📷', '720p plug-and-play webcam'],
+    ['Bluetooth Speaker Mini', 2.25, 'Electronics', '🔊', 'Portable rechargeable speaker'],
+    ['Monitor Stand', 2.50, 'Electronics', '🖥️', 'Aluminium riser for monitors'],
+    ['Mechanical Keyboard', 1.80, 'Electronics', '⌨️', 'Tactile switches, UK layout'],
+    ['Laptop Sleeve 15"', 0.65, 'Electronics', '💼', 'Padded protective sleeve'],
 
-    ['Chicken Breast 500g', 3.50, 'Meat & Fish', '🍗', 'British chicken breast fillets'],
-    ['Beef Mince 500g', 3.25, 'Meat & Fish', '🥩', 'Lean beef mince, less than 5% fat'],
-    ['Salmon Fillets 2pk', 4.00, 'Meat & Fish', '🐟', 'Boneless salmon fillets'],
-    ['Smoked Back Bacon', 2.75, 'Meat & Fish', '🥓', '8 rashers of back bacon'],
-    ['King Prawns 200g', 4.50, 'Meat & Fish', '🦐', 'Cooked and peeled king prawns'],
+    ['USB-C Hub 7-in-1', 3.50, 'Peripherals', '🔧', 'HDMI, USB-A, SD, power pass-through'],
+    ['HDMI Cable 2m', 3.25, 'Peripherals', '📺', 'High-speed 4K capable'],
+    ['External SSD 500GB', 4.00, 'Peripherals', '💾', 'USB 3.2 portable drive'],
+    ['Docking Station', 2.75, 'Peripherals', '🔗', 'Laptop dock with display outputs'],
+    ['Card Reader USB-C', 4.50, 'Peripherals', '🗂️', 'SD and microSD slots'],
 
-    ['Whole Milk 2L', 1.45, 'Dairy & Eggs', '🥛', 'Fresh British whole milk'],
-    ['Mature Cheddar 400g', 2.50, 'Dairy & Eggs', '🧀', 'Full-flavoured cheddar cheese'],
-    ['Free Range Eggs 6pk', 1.80, 'Dairy & Eggs', '🥚', 'Large free range eggs'],
-    ['Salted Butter 250g', 1.95, 'Dairy & Eggs', '🧈', 'Creamy British butter'],
+    ['Desk Organizer Set', 1.45, 'Office', '📥', 'Mesh tray and pen cups'],
+    ['Large Desk Pad', 2.50, 'Office', '📋', 'Non-slip desk mat'],
+    ['Notebook 5-pack', 1.80, 'Office', '📓', 'A5 ruled notebooks'],
+    ['Pen Set 12 Colours', 1.95, 'Office', '✏️', 'Gel pens assorted colours'],
 
-    ['White Bread 800g', 1.10, 'Bakery', '🍞', 'Soft white sliced bread'],
-    ['Croissants 4pk', 1.50, 'Bakery', '🥐', 'All butter croissants'],
-    ['Chocolate Muffins 4pk', 1.75, 'Bakery', '🧁', 'Indulgent chocolate chip muffins'],
-    ['Baguette', 0.85, 'Bakery', '🥖', 'Crusty French-style baguette'],
+    ['Printer Paper A4 500', 1.10, 'Stationery', '📄', '80gsm white copier paper'],
+    ['Sticky Notes 6pk', 1.50, 'Stationery', '📝', 'Assorted sizes and colours'],
+    ['Highlighter Set 4pk', 1.75, 'Stationery', '🖍️', 'Chisel tip highlighters'],
+    ['Ring Binder A4', 0.85, 'Stationery', '📒', '2-ring mechanism, durable cover'],
 
-    ['Orange Juice 1L', 1.20, 'Drinks', '🥤', 'Smooth not from concentrate'],
-    ['Apple Juice 1L', 1.10, 'Drinks', '🧃', 'Pressed apple juice'],
-    ['Ground Coffee 200g', 3.50, 'Drinks', '☕', 'Rich roast ground coffee'],
-    ['Green Tea 40 bags', 1.85, 'Drinks', '🍵', 'Light and refreshing green tea'],
+    ['Blank DVDs 10pk', 1.20, 'Media', '💿', 'Writeable optical discs'],
+    ['USB Flash Drive 32GB', 1.10, 'Media', '🔑', 'USB 3.0 swivel drive'],
+    ['External HDD 1TB', 3.50, 'Media', '💽', 'Powered desktop hard drive'],
+    ['SD Card 64GB', 1.85, 'Media', '📼', 'Class 10 UHS-I memory card'],
 
-    ['Chocolate Digestives', 1.55, 'Snacks', '🍪', 'Milk chocolate coated digestives'],
-    ['Microwave Popcorn 3pk', 1.25, 'Snacks', '🍿', 'Butter flavour microwave popcorn'],
-    ['Mixed Nuts 200g', 2.30, 'Snacks', '🥜', 'Roasted and salted mixed nuts'],
-    ['Milk Chocolate Bar 200g', 1.00, 'Snacks', '🍫', 'Smooth milk chocolate'],
+    ['Screen Protector 2pk', 1.55, 'Gadgets', '🛡️', 'Tempered glass universal size'],
+    ['Phone Stand Foldable', 1.25, 'Gadgets', '📱', 'Adjustable aluminium stand'],
+    ['Cable Ties 100pc', 2.30, 'Gadgets', '🔗', 'Reusable velcro ties'],
+    ['Power Bank 10000mAh', 1.00, 'Gadgets', '🔋', 'Dual USB output portable charger'],
 
-    ['Margherita Pizza', 2.50, 'Frozen', '🍕', 'Stonebaked thin crust pizza'],
-    ['Fish Fingers 12pk', 2.25, 'Frozen', '🐟', 'Crispy coated cod fish fingers'],
-    ['Vanilla Ice Cream 1L', 2.75, 'Frozen', '🍦', 'Creamy Cornish vanilla ice cream'],
-    ['Garden Peas 900g', 1.00, 'Frozen', '🟢', 'Freshly frozen garden peas'],
+    ['Desk Fan USB', 2.50, 'Home', '🌀', 'Quiet 3-speed mini fan'],
+    ['LED Strip 2m', 2.25, 'Home', '✨', 'RGB with remote control'],
+    ['Air Purifier Mini', 2.75, 'Home', '🌬️', 'HEPA filter compact unit'],
+    ['Cable Management Box', 1.00, 'Home', '📦', 'Hide power strips and cables'],
 
-    ['Kitchen Roll 2pk', 1.50, 'Household', '🧻', 'Strong and absorbent kitchen towels'],
-    ['Shampoo 400ml', 2.00, 'Household', '🧴', 'Everyday gentle shampoo'],
-    ['Washing Up Liquid 500ml', 1.25, 'Household', '🧼', 'Original washing up liquid'],
-    ['Bin Bags 30pk', 1.75, 'Household', '🗑️', 'Strong drawstring bin liners'],
+    ['Screen Cleaning Kit', 1.50, 'General', '🧽', 'Spray and microfibre cloth'],
+    ['Microfibre Cloths 5pk', 2.00, 'General', '🧺', 'Lint-free cleaning cloths'],
+    ['Precision Screwdriver Set', 1.25, 'General', '🪛', 'Torx and Phillips bits'],
+    ['Storage Box Stackable', 1.75, 'General', '🗃️', 'Clear plastic with lid'],
   ];
 
   const insertProduct = db.prepare(
@@ -448,12 +448,12 @@ async function seed() {
 
   const deals = [
     [2, 20, 0.60, 'Price Drop', '2025-01-01', '2025-12-31'],
-    [9, 30, 2.45, 'Clubcard Price', '2025-01-01', '2025-12-31'],
+    [9, 30, 2.45, 'Member Price', '2025-01-01', '2025-12-31'],
     [14, 15, 1.23, 'Weekly Offer', '2025-01-01', '2025-12-31'],
     [22, 25, 0.90, 'Price Drop', '2025-01-01', '2025-12-31'],
     [30, 50, 1.25, 'Half Price', '2025-01-01', '2025-12-31'],
     [26, 33, 1.04, '3 for 2', '2025-01-01', '2025-12-31'],
-    [5, 20, 1.80, 'Clubcard Price', '2025-01-01', '2025-12-31'],
+    [5, 20, 1.80, 'Member Price', '2025-01-01', '2025-12-31'],
     [16, 10, 1.62, 'Price Drop', '2025-01-01', '2025-12-31'],
   ];
 
@@ -479,7 +479,7 @@ async function seed() {
   insertItem.run(o1.lastInsertRowid, 9, 1, 3.50);
   insertReward.run(1, 12, 'earned', `Order #${o1.lastInsertRowid}`, '2025-03-15 09:30:00');
 
-  const o2 = insertOrder.run(1, 8.75, 'collected', 'collection', null, 'London - Covent Garden', '14:00-16:00', '2025-04-01', '2025-04-01 13:00:00');
+  const o2 = insertOrder.run(1, 8.75, 'collected', 'collection', null, 'Branch A — City Centre', '14:00-16:00', '2025-04-01', '2025-04-01 13:00:00');
   insertItem.run(o2.lastInsertRowid, 22, 2, 1.20);
   insertItem.run(o2.lastInsertRowid, 26, 1, 1.55);
   insertItem.run(o2.lastInsertRowid, 30, 1, 2.50);
@@ -723,7 +723,7 @@ module.exports = router;</textarea>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/package.json</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
 <textarea readonly rows="17">{
-  "name": "freshmart-frontend",
+  "name": "catalog-demo-frontend",
   "version": "1.0.0",
   "private": true,
   "dependencies": {
@@ -754,7 +754,7 @@ module.exports = router;</textarea>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>FreshMart - Online Groceries</title>
+  <title>Catalog Demo</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛒</text></svg>">
 </head>
 <body>
@@ -865,8 +865,8 @@ function App() {
       <footer className="footer">
         <div className="footer-content">
           <div className="footer-section">
-            <h4>FreshMart</h4>
-            <p>Your trusted online grocery store.</p>
+            <h4>Catalog Demo</h4>
+            <p>Example full-stack coursework project.</p>
           </div>
           <div className="footer-section">
             <h4>Quick Links</h4>
@@ -874,11 +874,11 @@ function App() {
           </div>
           <div className="footer-section">
             <h4>Contact</h4>
-            <p>support@freshmart.com</p>
+            <p>support@example.com</p>
           </div>
         </div>
         <div className="footer-bottom">
-          <p>&copy; 2025 FreshMart. All rights reserved.</p>
+          <p>&copy; 2025 Demo project. All rights reserved.</p>
         </div>
       </footer>
     </div>
@@ -891,7 +891,7 @@ export default App;</textarea>
 
 <div class="section" id="f-appcss">
 <h2>Frontend: src/App.css</h2>
-<p>All the styles for the entire application — navbar, cart panel, footer, hero, product grid, cards, forms, checkout layout, auth pages, and responsive breakpoints. This is the longest file.</p>
+<p>All the styles for the entire application — navbar, slide-out basket, footer, hero, product grid, cards, forms, checkout layout, auth pages, and responsive breakpoints. This is the longest file.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/src/App.css</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
 <textarea readonly rows="80">.app {
@@ -1835,7 +1835,7 @@ export default App;</textarea>
 <!-- ==================== STATE MANAGEMENT ==================== -->
 <div class="section" id="f-cart">
 <h2>State Management: CartContext.js</h2>
-<p>React Context for the shopping cart. Provides addToCart, removeFromCart, updateQuantity, clearCart, plus computed cartTotal and cartCount values to all components.</p>
+<p>React Context for the checkout basket. Provides addToCart, removeFromCart, updateQuantity, clearCart, plus computed cartTotal and cartCount values to all components.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/src/context/CartContext.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
 <textarea readonly rows="56">import { createContext, useContext, useState } from 'react';
@@ -1909,15 +1909,15 @@ const UserContext = createContext();
 
 export function UserProvider({ children }) {
   const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('freshmart_user');
+    const saved = localStorage.getItem('catalogdemo_session');
     return saved ? JSON.parse(saved) : null;
   });
 
   useEffect(() => {
     if (user) {
-      localStorage.setItem('freshmart_user', JSON.stringify(user));
+      localStorage.setItem('catalogdemo_session', JSON.stringify(user));
     } else {
-      localStorage.removeItem('freshmart_user');
+      localStorage.removeItem('catalogdemo_session');
     }
   }, [user]);
 
@@ -1938,7 +1938,7 @@ export const useUser = () => useContext(UserContext);</textarea>
 <!-- ==================== COMPONENTS ==================== -->
 <div class="section" id="f-navbar">
 <h2>Component: Navbar.js</h2>
-<p>Navigation bar with logo, page links, cart button with item count badge, and login/logout. Includes a slide-out cart panel that shows items with quantity controls and checkout buttons for delivery or collection.</p>
+<p>Navigation bar with logo, page links, basket button with item count badge, and login/logout. Includes a slide-out panel with quantity controls and checkout links for delivery or collection.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/src/components/Navbar.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
 <textarea readonly rows="60">import { useState } from 'react';
@@ -1960,7 +1960,7 @@ function Navbar() {
       <nav className="navbar">
         <div className="navbar-content">
           <Link to="/" className="navbar-logo">
-            🛒 Fresh<span>Mart</span>
+            🛒 Catalog<span>Demo</span>
           </Link>
 
           <div className="navbar-links">
@@ -1973,7 +1973,7 @@ function Navbar() {
 
           <div className="navbar-right">
             <button className="cart-btn" onClick={() => setCartOpen(true)}>
-              🛒 Cart
+              🛒 Basket
               {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
             </button>
 
@@ -1994,7 +1994,7 @@ function Navbar() {
           <div className="cart-overlay" onClick={() => setCartOpen(false)} />
           <div className="cart-panel">
             <div className="cart-header">
-              <h2>Your Cart ({cartCount})</h2>
+              <h2>Your basket ({cartCount})</h2>
               <button className="cart-close" onClick={() => setCartOpen(false)}>✕</button>
             </div>
 
@@ -2002,7 +2002,7 @@ function Navbar() {
               {cartItems.length === 0 ? (
                 <div className="cart-empty">
                   <p style={{ fontSize: '3rem' }}>🛒</p>
-                  <p>Your cart is empty</p>
+                  <p>Your basket is empty</p>
                 </div>
               ) : (
                 cartItems.map(item => (
@@ -2042,7 +2042,7 @@ function Navbar() {
                     className="btn-collection"
                     onClick={() => setCartOpen(false)}
                   >
-                    🏪 Checkout for Collection
+                    🏪 Checkout (pickup)
                   </Link>
                 </div>
               </div>
@@ -2060,7 +2060,7 @@ export default Navbar;</textarea>
 
 <div class="section" id="f-prodcard">
 <h2>Component: ProductCard.js</h2>
-<p>Reusable product card used on the Home, Products, and Deals pages. Shows the product image (emoji), name, description, price (with deal price if applicable), and an "Add to Cart" button with a brief "Added" animation.</p>
+<p>Reusable product card used on the Home, Products, and Deals pages. Shows the image (emoji), name, description, price (with deal price if applicable), and an add button with a brief confirmation state.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/src/components/ProductCard.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
 <textarea readonly rows="47">import { useState } from 'react';
@@ -2102,7 +2102,7 @@ function ProductCard({ product, deal }) {
           className={`add-to-cart-btn ${added ? 'added' : ''}`}
           onClick={handleAdd}
         >
-          {added ? '✓ Added' : 'Add to Cart'}
+          {added ? '✓ Added' : 'Add to basket'}
         </button>
       </div>
     </div>
@@ -2116,7 +2116,7 @@ export default ProductCard;</textarea>
 <!-- ==================== PAGES ==================== -->
 <div class="section" id="p-home">
 <h2>Page: Home.js</h2>
-<p>Landing page with a hero banner, category grid linking to filtered products, a preview of current deals, and featured products from the Fruit &amp; Veg category.</p>
+<p>Landing page with a hero banner, category grid linking to filtered listings, a preview of current promotions, and featured items from the first category (Electronics).</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/src/pages/Home.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
 <textarea readonly rows="60">import { useState, useEffect } from 'react';
@@ -2126,14 +2126,14 @@ import ProductCard from '../components/ProductCard';
 const API = 'http://localhost:5000/api';
 
 const categoryEmojis = {
-  'Fruit & Veg': '🥬',
-  'Meat & Fish': '🥩',
-  'Dairy & Eggs': '🥛',
-  'Bakery': '🍞',
-  'Drinks': '☕',
-  'Snacks': '🍪',
-  'Frozen': '🍕',
-  'Household': '🧴'
+  'Electronics': '💻',
+  'Peripherals': '🔌',
+  'Office': '📎',
+  'Stationery': '✏️',
+  'Media': '💿',
+  'Gadgets': '📱',
+  'Home': '🏠',
+  'General': '📦'
 };
 
 function Home() {
@@ -2147,7 +2147,7 @@ function Home() {
       .then(data => setDeals(data.slice(0, 4)))
       .catch(() => {});
 
-    fetch(`${API}/products?category=Fruit & Veg`)
+    fetch(`${API}/products?category=Electronics`)
       .then(res => res.json())
       .then(data => setFeatured(data.slice(0, 4)))
       .catch(() => {});
@@ -2161,12 +2161,12 @@ function Home() {
   return (
     <div>
       <div className="hero">
-        <h1>Welcome to FreshMart</h1>
-        <p>Fresh groceries delivered to your door or ready for collection</p>
-        <Link to="/products" className="hero-btn">Shop Now</Link>
+        <h1>Welcome to Catalog Demo</h1>
+        <p>Browse the catalog with delivery or pickup checkout flows</p>
+        <Link to="/products" className="hero-btn">Browse catalog</Link>
       </div>
 
-      <h2 className="section-title">Shop by Category</h2>
+      <h2 className="section-title">Browse by category</h2>
       <div className="category-grid">
         {categories.map(cat => (
           <Link to={`/products?category=${encodeURIComponent(cat)}`} key={cat} className="category-card">
@@ -2178,7 +2178,7 @@ function Home() {
 
       {deals.length > 0 && (
         <>
-          <h2 className="section-title">Today's Deals</h2>
+          <h2 className="section-title">Promotions</h2>
           <div className="product-grid">
             {deals.map(deal => (
               <ProductCard
@@ -2196,7 +2196,7 @@ function Home() {
           </div>
           <div style={{ textAlign: 'center', marginBottom: 40 }}>
             <Link to="/deals" className="hero-btn" style={{ background: '#e31837', color: 'white' }}>
-              View All Deals
+              View all promotions
             </Link>
           </div>
         </>
@@ -2204,7 +2204,7 @@ function Home() {
 
       {featured.length > 0 && (
         <>
-          <h2 className="section-title">Fresh Picks</h2>
+          <h2 className="section-title">Featured items</h2>
           <div className="product-grid">
             {featured.map(product => (
               <ProductCard key={product.id} product={product} />
@@ -2362,20 +2362,20 @@ function Deals() {
       .catch(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="loading">Loading deals...</div>;
+  if (loading) return <div className="loading">Loading promotions...</div>;
 
   return (
     <div>
       <div className="deals-banner">
-        <h1>🔥 Today's Deals</h1>
-        <p>Great savings on your favourite products</p>
+        <h1>🔥 Promotions</h1>
+        <p>Discounted items from the catalog</p>
       </div>
 
       {deals.length === 0 ? (
         <div className="empty-state">
           <div className="icon">🏷️</div>
-          <h2>No deals right now</h2>
-          <p>Check back soon for new offers</p>
+          <h2>No promotions right now</h2>
+          <p>Check back later for discounts</p>
         </div>
       ) : (
         <div className="product-grid">
@@ -2453,8 +2453,8 @@ function OrderHistory() {
         <div className="empty-state">
           <div className="icon">📦</div>
           <h2>No orders yet</h2>
-          <p>Start shopping to see your orders here</p>
-          <Link to="/products">Browse Products</Link>
+          <p>Place an order to see history here</p>
+          <Link to="/products">Browse catalog</Link>
         </div>
       ) : (
         orders.map(order => (
@@ -2590,7 +2590,7 @@ function Rewards() {
           <div className="icon">⭐</div>
           <h2>No rewards yet</h2>
           <p>Earn 1 point for every £1 you spend</p>
-          <Link to="/products">Start Shopping</Link>
+          <Link to="/products">Browse catalog</Link>
         </div>
       ) : (
         rewardsData?.history?.map(item => (
@@ -2619,7 +2619,7 @@ export default Rewards;</textarea>
 
 <div class="section" id="p-collection">
 <h2>Page: Collection.js</h2>
-<p>Click &amp; Collect checkout page. User selects a store from a dropdown, picks a date and time slot, reviews the order summary, and places the order. Shows a success screen with order details and points earned.</p>
+<p>Pickup checkout page. User selects a branch from a dropdown, picks a date and time slot, reviews the order summary, and submits. Success screen shows confirmation and loyalty points.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/src/pages/Collection.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
 <textarea readonly rows="60">import { useState } from 'react';
@@ -2630,12 +2630,12 @@ import { useUser } from '../context/UserContext';
 const API = 'http://localhost:5000/api';
 
 const stores = [
-  'London - Covent Garden',
-  'London - Kensington',
-  'Manchester - Piccadilly',
-  'Birmingham - Bull Ring',
-  'Leeds - City Centre',
-  'Glasgow - Argyle Street'
+  'Branch A — City Centre',
+  'Branch B — Riverside',
+  'Branch C — Tech Park',
+  'Branch D — Mall',
+  'Branch E — North',
+  'Branch F — South'
 ];
 
 const timeSlots = [
@@ -2701,9 +2701,9 @@ function Collection() {
     return (
       <div className="empty-state">
         <div className="icon">🛒</div>
-        <h2>Your cart is empty</h2>
+        <h2>Your basket is empty</h2>
         <p>Add some products before checkout</p>
-        <Link to="/products">Browse Products</Link>
+        <Link to="/products">Browse catalog</Link>
       </div>
     );
   }
@@ -2724,7 +2724,7 @@ function Collection() {
             View Orders
           </Link>
           <Link to="/products" className="hero-btn" style={{ fontSize: '0.9rem', padding: '10px 20px', background: '#27ae60' }}>
-            Continue Shopping
+            Continue browsing
           </Link>
         </div>
       </div>
@@ -2735,16 +2735,16 @@ function Collection() {
 
   return (
     <div>
-      <h1 style={{ marginBottom: 24 }}>🏪 Click & Collect</h1>
+      <h1 style={{ marginBottom: 24 }}>🏪 Store pickup</h1>
 
       <div className="checkout-layout">
         <form className="checkout-form" onSubmit={handleSubmit}>
           <h2>Collection Details</h2>
 
           <div className="form-group">
-            <label>Select Store</label>
+            <label>Select branch</label>
             <select value={store} onChange={e => setStore(e.target.value)} required>
-              <option value="">Choose a store...</option>
+              <option value="">Choose a branch...</option>
               {stores.map(s => (
                 <option key={s} value={s}>{s}</option>
               ))}
@@ -2880,9 +2880,9 @@ function Delivery() {
     return (
       <div className="empty-state">
         <div className="icon">🛒</div>
-        <h2>Your cart is empty</h2>
+        <h2>Your basket is empty</h2>
         <p>Add some products before checkout</p>
-        <Link to="/products">Browse Products</Link>
+        <Link to="/products">Browse catalog</Link>
       </div>
     );
   }
@@ -2903,7 +2903,7 @@ function Delivery() {
             View Orders
           </Link>
           <Link to="/products" className="hero-btn" style={{ fontSize: '0.9rem', padding: '10px 20px', background: '#27ae60' }}>
-            Continue Shopping
+            Continue browsing
           </Link>
         </div>
       </div>
@@ -2915,7 +2915,7 @@ function Delivery() {
 
   return (
     <div>
-      <h1 style={{ marginBottom: 24 }}>🚚 Home Delivery</h1>
+      <h1 style={{ marginBottom: 24 }}>🚚 Delivery</h1>
 
       <div className="checkout-layout">
         <form className="checkout-form" onSubmit={handleSubmit}>
