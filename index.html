@@ -15,7 +15,7 @@ a{color:inherit;text-decoration:none}
 /* ===== TOP NAV ===== */
 .topnav{background:var(--dark-bg);overflow:hidden;position:sticky;top:0;z-index:200;box-shadow:0 2px 5px rgba(0,0,0,.2)}
 .topnav-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;height:56px;padding:0 16px}
-.topnav .logo{color:#fff;font-weight:700;font-size:20px;padding:0 14px 0 0;letter-spacing:-.5px;white-space:nowrap;cursor:default}
+.topnav .logo,.topnav a.logo{color:#fff;font-weight:700;font-size:20px;padding:0 14px 0 0;letter-spacing:-.5px;white-space:nowrap;cursor:pointer}
 .topnav .logo b{color:var(--green)}
 .topnav-links{display:flex;gap:2px;flex:1}
 .topnav-links a{color:hsla(0,0%,100%,.75);padding:8px 14px;border-radius:4px;font-size:14px;transition:background .15s}
@@ -115,6 +115,34 @@ footer a{color:hsla(0,0%,100%,.8);margin:0 10px}
 footer a:hover{color:#fff;text-decoration:underline}
 footer .copy{margin-top:12px;opacity:.5;font-size:12px}
 
+/* ===== SITE SEARCH ===== */
+.site-search-wrap{display:flex;align-items:center;margin-right:8px}
+.site-search{width:140px;max-width:40vw;padding:6px 10px;border:1px solid hsla(0,0%,100%,.25);border-radius:4px;background:hsla(0,0%,100%,.08);color:#fff;font-size:13px;font-family:inherit}
+.site-search::placeholder{color:hsla(0,0%,100%,.45)}
+.site-search:focus{outline:none;border-color:var(--green);background:hsla(0,0%,100%,.12)}
+
+/* ===== REF GRID & STATIC PAGES ===== */
+.ref-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin:20px 0}
+.ref-grid a{display:block;padding:14px 16px;background:var(--sidebar-bg);border:1px solid var(--border);border-radius:6px;text-align:center;font-weight:600;color:var(--green);transition:background .15s,border-color .15s}
+.ref-grid a:hover{background:rgba(4,170,109,.12);border-color:var(--green)}
+.quiz-q{margin:20px 0;padding:16px;border:1px solid var(--border);border-radius:8px;background:var(--sidebar-bg)}
+.quiz-q h3{margin-bottom:12px;font-size:16px}
+.quiz-options{display:flex;flex-wrap:wrap;gap:8px}
+.quiz-options button{padding:8px 14px;border:1px solid var(--border);border-radius:4px;background:var(--main-bg);cursor:pointer;font-family:inherit;font-size:13px;transition:background .15s}
+.quiz-options button:hover{background:var(--code-bg)}
+.quiz-options button.correct{background:rgba(4,170,109,.25);border-color:var(--green)}
+.quiz-options button.wrong{background:rgba(220,53,69,.2);border-color:#dc3545}
+.quiz-feedback{margin-top:10px;font-size:14px;font-weight:600}
+.color-demo{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;margin:20px 0}
+.color-swatch{width:120px;height:120px;border-radius:8px;border:2px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.color-values{flex:1;min-width:220px}
+.color-values p{margin:8px 0;font-family:Consolas,monospace;font-size:14px}
+.color-values button{margin-top:8px;margin-right:8px;padding:8px 14px;cursor:pointer;font-family:inherit;border-radius:4px;border:1px solid var(--border);background:var(--sidebar-bg)}
+.snippet-row{display:flex;gap:10px;align-items:flex-start;margin:12px 0;padding:12px;background:var(--code-bg);border-radius:6px;flex-wrap:wrap}
+.snippet-row pre{flex:1;min-width:200px;margin:0;background:transparent;border:none;padding:0}
+.snippet-row button{flex-shrink:0;padding:6px 12px;cursor:pointer;font-size:12px;border-radius:4px;border:1px solid var(--green);background:var(--green);color:#fff;font-family:inherit}
+.snippet-row button.copied{background:var(--green-hover)}
+
 /* ===== RESPONSIVE ===== */
 @media(max-width:900px){
   .sidebar{display:none}
@@ -133,14 +161,17 @@ footer .copy{margin-top:12px;opacity:.5;font-size:12px}
 <!-- ===== TOP NAV ===== -->
 <nav class="topnav">
   <div class="topnav-inner">
-    <div class="logo"><b>&lt;/&gt;</b> CodeGeek</div>
+    <a href="#home" class="logo" style="text-decoration:none"><b>&lt;/&gt;</b> CodeGeek</a>
     <div class="topnav-links">
-      <a href="#home" data-nav="home">Tutorials</a>
-      <a href="#html" data-nav="page">References</a>
-      <a href="#js" data-nav="page">Exercises</a>
-      <a href="#" onclick="return false;">Certificates</a>
+      <a href="#home">Tutorials</a>
+      <a href="#references">References</a>
+      <a href="#exercises">Exercises</a>
+      <a href="#certificates">Certificates</a>
     </div>
     <div class="topnav-right">
+      <div class="site-search-wrap">
+        <input type="search" class="site-search" id="siteSearch" placeholder="Search topics…" autocomplete="off" aria-label="Search topics">
+      </div>
       <button class="theme-btn" id="themeToggle" type="button" title="Toggle dark mode">&#9790; Dark</button>
     </div>
   </div>
@@ -149,34 +180,34 @@ footer .copy{margin-top:12px;opacity:.5;font-size:12px}
 <!-- ===== GREEN BAR ===== -->
 <div class="greenbar">
   <div class="greenbar-inner">
-    <a href="#html" data-nav="page">HTML</a>
-    <a href="#css" data-nav="page">CSS</a>
-    <a href="#js" data-nav="page">JAVASCRIPT</a>
-    <a href="#sql" data-nav="page">SQL</a>
-    <a href="#python" data-nav="page">PYTHON</a>
-    <a href="#" onclick="return false;">JAVA</a>
-    <a href="#" onclick="return false;">PHP</a>
-    <a href="#" onclick="return false;">C</a>
-    <a href="#" onclick="return false;">C++</a>
-    <a href="#" onclick="return false;">C#</a>
-    <a href="#" onclick="return false;">BOOTSTRAP</a>
-    <a href="#" onclick="return false;">REACT</a>
-    <a href="#" onclick="return false;">MYSQL</a>
-    <a href="#" onclick="return false;">JQUERY</a>
-    <a href="#" onclick="return false;">EXCEL</a>
-    <a href="#" onclick="return false;">XML</a>
-    <a href="#" onclick="return false;">DJANGO</a>
-    <a href="#" onclick="return false;">NUMPY</a>
-    <a href="#" onclick="return false;">PANDAS</a>
-    <a href="#" onclick="return false;">NODEJS</a>
-    <a href="#" onclick="return false;">DSA</a>
-    <a href="#" onclick="return false;">TYPESCRIPT</a>
-    <a href="#" onclick="return false;">GIT</a>
-    <a href="#" onclick="return false;">MONGODB</a>
-    <a href="#" onclick="return false;">R</a>
-    <a href="#" onclick="return false;">GO</a>
-    <a href="#" onclick="return false;">KOTLIN</a>
-    <a href="#" onclick="return false;">RUST</a>
+    <a href="#html">HTML</a>
+    <a href="#css">CSS</a>
+    <a href="#js">JAVASCRIPT</a>
+    <a href="#sql">SQL</a>
+    <a href="#python">PYTHON</a>
+    <a href="#java">JAVA</a>
+    <a href="#php">PHP</a>
+    <a href="#c">C</a>
+    <a href="#cpp">C++</a>
+    <a href="#csharp">C#</a>
+    <a href="#bootstrap">BOOTSTRAP</a>
+    <a href="#react">REACT</a>
+    <a href="#mysql">MYSQL</a>
+    <a href="#jquery">JQUERY</a>
+    <a href="#excel">EXCEL</a>
+    <a href="#xml">XML</a>
+    <a href="#django">DJANGO</a>
+    <a href="#numpy">NUMPY</a>
+    <a href="#pandas">PANDAS</a>
+    <a href="#nodejs">NODEJS</a>
+    <a href="#dsa">DSA</a>
+    <a href="#typescript">TYPESCRIPT</a>
+    <a href="#git">GIT</a>
+    <a href="#mongodb">MONGODB</a>
+    <a href="#r">R</a>
+    <a href="#go">GO</a>
+    <a href="#kotlin">KOTLIN</a>
+    <a href="#rust">RUST</a>
   </div>
 </div>
 
@@ -186,7 +217,7 @@ footer .copy{margin-top:12px;opacity:.5;font-size:12px}
     <h1>Learn to <span>Code</span></h1>
     <p>With the world's largest web developer site.</p>
     <div style="margin-bottom:18px;font-size:15px;opacity:.7">Not Sure Where To Begin?</div>
-    <a href="#html" class="hero-start" data-nav="page">Get Started</a>
+    <a href="#html" class="hero-start">Get Started</a>
   </div>
 
   <div class="lang-section">
@@ -195,8 +226,8 @@ footer .copy{margin-top:12px;opacity:.5;font-size:12px}
         <h2>HTML</h2>
         <p class="lang-desc">The language for building web pages</p>
         <div class="lang-links">
-          <a href="#html" data-nav="page">Learn HTML</a>
-          <a href="#html" class="outline" data-nav="page">Reference</a>
+          <a href="#html">Learn HTML</a>
+          <a href="#html" class="outline">Reference</a>
         </div>
       </div>
       <div class="lang-code">&lt;!DOCTYPE html&gt;
@@ -220,8 +251,8 @@ footer .copy{margin-top:12px;opacity:.5;font-size:12px}
         <h2>CSS</h2>
         <p class="lang-desc">The language for styling web pages</p>
         <div class="lang-links">
-          <a href="#css" data-nav="page">Learn CSS</a>
-          <a href="#css" class="outline" data-nav="page">Reference</a>
+          <a href="#css">Learn CSS</a>
+          <a href="#css" class="outline">Reference</a>
         </div>
       </div>
       <div class="lang-code">body {
@@ -246,8 +277,8 @@ p {
         <h2>JavaScript</h2>
         <p class="lang-desc">The language for programming web pages</p>
         <div class="lang-links">
-          <a href="#js" data-nav="page">Learn JavaScript</a>
-          <a href="#js" class="outline" data-nav="page">Reference</a>
+          <a href="#js">Learn JavaScript</a>
+          <a href="#js" class="outline">Reference</a>
         </div>
       </div>
       <div class="lang-code">&lt;button onclick="myFunction()"&gt;
@@ -270,8 +301,8 @@ function myFunction() {
         <h2>Python</h2>
         <p class="lang-desc">A popular programming language</p>
         <div class="lang-links">
-          <a href="#python" data-nav="page">Learn Python</a>
-          <a href="#python" class="outline" data-nav="page">Reference</a>
+          <a href="#python">Learn Python</a>
+          <a href="#python" class="outline">Reference</a>
         </div>
       </div>
       <div class="lang-code">if 5 &gt; 2:
@@ -285,8 +316,8 @@ function myFunction() {
         <h2>SQL</h2>
         <p class="lang-desc">A language for accessing databases</p>
         <div class="lang-links">
-          <a href="#sql" data-nav="page">Learn SQL</a>
-          <a href="#sql" class="outline" data-nav="page">Reference</a>
+          <a href="#sql">Learn SQL</a>
+          <a href="#sql" class="outline">Reference</a>
         </div>
       </div>
       <div class="lang-code">SELECT * FROM Customers
@@ -298,39 +329,39 @@ ORDER BY CustomerName;</div>
   <div class="home-cta">
     <h2>Get Certified</h2>
     <p>Document your knowledge with a certificate from CodeGeek.</p>
-    <a href="#" onclick="return false;">Learn More</a>
+    <a href="#certificates">Learn More</a>
   </div>
 
   <div class="home-extras">
     <div class="extra-card">
       <h3>Code Editor</h3>
       <p>Edit code and view the result in your browser.</p>
-      <a href="#html" data-nav="page">Try it &rarr;</a>
+      <a href="#html">Try it &rarr;</a>
     </div>
     <div class="extra-card">
       <h3>Color Picker</h3>
       <p>Find different RGB, HEX and HSL colour values.</p>
-      <a href="#" onclick="return false;">Open &rarr;</a>
+      <a href="#colorpicker">Open &rarr;</a>
     </div>
     <div class="extra-card">
       <h3>Exercises</h3>
       <p>Test your skills with quizzes and coding challenges.</p>
-      <a href="#" onclick="return false;">Start &rarr;</a>
+      <a href="#exercises">Start &rarr;</a>
     </div>
     <div class="extra-card">
       <h3>Web Templates</h3>
       <p>Browse responsive HTML templates you can use for free.</p>
-      <a href="#" onclick="return false;">Browse &rarr;</a>
+      <a href="#templates">Browse &rarr;</a>
     </div>
     <div class="extra-card">
       <h3>How To</h3>
       <p>Large collection of code snippets for HTML, CSS and JS.</p>
-      <a href="#" onclick="return false;">Explore &rarr;</a>
+      <a href="#howto">Explore &rarr;</a>
     </div>
     <div class="extra-card">
       <h3>Spaces</h3>
       <p>Create your own website and share it with the world.</p>
-      <a href="#" onclick="return false;">Get Started &rarr;</a>
+      <a href="#spaces">Get Started &rarr;</a>
     </div>
   </div>
 </div>
@@ -353,7 +384,7 @@ ORDER BY CustomerName;</div>
     <a href="#" data-panel="html-semantic" data-kw="html5 semantic header nav main footer article">HTML5 Semantics</a>
   </nav>
   <div class="content">
-    <div class="breadcrumb"><a href="#home" data-nav="home">Home</a> / <span class="crumb-current">HTML Introduction</span></div>
+    <div class="breadcrumb"><a href="#home">Home</a> / <span class="crumb-current">HTML Introduction</span></div>
 
     <div class="panel active" id="html-intro">
       <h1>HTML Introduction</h1>
@@ -624,7 +655,7 @@ ORDER BY CustomerName;</div>
     <a href="#" data-panel="css-colors" data-kw="css colors rgb hex hsl">CSS Colors</a>
   </nav>
   <div class="content">
-    <div class="breadcrumb"><a href="#home" data-nav="home">Home</a> / <span class="crumb-current">CSS Introduction</span></div>
+    <div class="breadcrumb"><a href="#home">Home</a> / <span class="crumb-current">CSS Introduction</span></div>
 
     <div class="panel active" id="css-intro">
       <h1>CSS Introduction</h1>
@@ -760,7 +791,7 @@ p { font-size: 18px; color: #333; }
     <a href="#" data-panel="js-async" data-kw="javascript async await promise fetch ajax">JS Async</a>
   </nav>
   <div class="content">
-    <div class="breadcrumb"><a href="#home" data-nav="home">Home</a> / <span class="crumb-current">JS Introduction</span></div>
+    <div class="breadcrumb"><a href="#home">Home</a> / <span class="crumb-current">JS Introduction</span></div>
 
     <div class="panel active" id="js-intro">
       <h1>JavaScript Introduction</h1>
@@ -919,7 +950,7 @@ const text = JSON.stringify(obj);
     <a href="#" data-panel="sql-update" data-kw="sql update set where">SQL UPDATE / DELETE</a>
   </nav>
   <div class="content">
-    <div class="breadcrumb"><a href="#home" data-nav="home">Home</a> / <span class="crumb-current">SQL Introduction</span></div>
+    <div class="breadcrumb"><a href="#home">Home</a> / <span class="crumb-current">SQL Introduction</span></div>
 
     <div class="panel active" id="sql-intro">
       <h1>SQL Introduction</h1>
@@ -1028,7 +1059,7 @@ WHERE CustomerName = 'Cardinal';</pre>
     <a href="#" data-panel="py-functions" data-kw="python functions def return lambda">Python Functions</a>
   </nav>
   <div class="content">
-    <div class="breadcrumb"><a href="#home" data-nav="home">Home</a> / <span class="crumb-current">Python Introduction</span></div>
+    <div class="breadcrumb"><a href="#home">Home</a> / <span class="crumb-current">Python Introduction</span></div>
 
     <div class="panel active" id="py-intro">
       <h1>Python Introduction</h1>
@@ -1132,27 +1163,307 @@ print(square(5))  # 25</pre>
   </div>
 </div>
 
+<!-- ===== REFERENCES INDEX ===== -->
+<div class="page" id="page-references">
+  <div class="content" style="max-width:900px;margin:0 auto;padding:26px 36px 60px">
+    <div class="breadcrumb"><a href="#home">Home</a> / <span>References</span></div>
+    <h1>References</h1>
+    <p class="lead">Jump to any tutorial on CodeGeek.</p>
+    <h2>Core web</h2>
+    <div class="ref-grid">
+      <a href="#html">HTML</a><a href="#css">CSS</a><a href="#js">JavaScript</a><a href="#sql">SQL</a><a href="#python">Python</a>
+    </div>
+    <h2>Languages &amp; tools</h2>
+    <div class="ref-grid">
+      <a href="#java">Java</a><a href="#php">PHP</a><a href="#c">C</a><a href="#cpp">C++</a><a href="#csharp">C#</a>
+      <a href="#bootstrap">Bootstrap</a><a href="#react">React</a><a href="#jquery">jQuery</a><a href="#nodejs">Node.js</a><a href="#typescript">TypeScript</a>
+      <a href="#mysql">MySQL</a><a href="#mongodb">MongoDB</a><a href="#git">Git</a><a href="#xml">XML</a><a href="#excel">Excel</a>
+      <a href="#django">Django</a><a href="#numpy">NumPy</a><a href="#pandas">Pandas</a><a href="#r">R</a><a href="#go">Go</a>
+      <a href="#kotlin">Kotlin</a><a href="#rust">Rust</a><a href="#dsa">DSA</a>
+    </div>
+    <h2>Tools &amp; more</h2>
+    <div class="ref-grid">
+      <a href="#colorpicker">Color Picker</a><a href="#templates">Templates</a><a href="#howto">How To</a><a href="#exercises">Exercises</a>
+    </div>
+  </div>
+</div>
+
+<!-- ===== EXERCISES ===== -->
+<div class="page" id="page-exercises">
+  <div class="content" style="max-width:720px;margin:0 auto;padding:26px 36px 60px">
+    <div class="breadcrumb"><a href="#home">Home</a> / <span>Exercises</span></div>
+    <h1>Quick quiz</h1>
+    <p class="lead">Click the correct answer. Your score updates instantly.</p>
+    <div id="quiz-score" style="margin-bottom:16px;font-weight:700;color:var(--green)">Score: 0 / 3</div>
+    <div class="quiz-q" data-quiz="1">
+      <h3>1. What does HTML stand for?</h3>
+      <div class="quiz-options">
+        <button type="button" data-correct="0">Hyperlinks and Text Markup Language</button>
+        <button type="button" data-correct="1">Hyper Text Markup Language</button>
+        <button type="button" data-correct="0">Home Tool Markup Language</button>
+      </div>
+      <div class="quiz-feedback" hidden></div>
+    </div>
+    <div class="quiz-q" data-quiz="2">
+      <h3>2. Which CSS property changes text colour?</h3>
+      <div class="quiz-options">
+        <button type="button" data-correct="0">font-color</button>
+        <button type="button" data-correct="1">color</button>
+        <button type="button" data-correct="0">text-style</button>
+      </div>
+      <div class="quiz-feedback" hidden></div>
+    </div>
+    <div class="quiz-q" data-quiz="3">
+      <h3>3. Which keyword declares a block-scoped variable in modern JavaScript?</h3>
+      <div class="quiz-options">
+        <button type="button" data-correct="0">var</button>
+        <button type="button" data-correct="1">let</button>
+        <button type="button" data-correct="0">define</button>
+      </div>
+      <div class="quiz-feedback" hidden></div>
+    </div>
+    <p style="margin-top:24px"><a href="#html">Continue learning HTML &rarr;</a></p>
+  </div>
+</div>
+
+<!-- ===== CERTIFICATES ===== -->
+<div class="page" id="page-certificates">
+  <div class="content" style="max-width:720px;margin:0 auto;padding:26px 36px 60px">
+    <div class="breadcrumb"><a href="#home">Home</a> / <span>Certificates</span></div>
+    <h1>Get certified</h1>
+    <p class="lead">CodeGeek certificates are a fun way to track what you have studied. Complete tutorials and exercises to build confidence before any formal assessment.</p>
+    <ul>
+      <li>Work through the <a href="#references">tutorial index</a></li>
+      <li>Try the <a href="#exercises">quick quiz</a></li>
+      <li>Practice in the <a href="#html">HTML Try It</a> editor</li>
+    </ul>
+    <p><a href="#exercises" style="display:inline-block;margin-top:12px;padding:12px 24px;background:var(--green);color:#fff;border-radius:50px;font-weight:700">Start exercises</a></p>
+  </div>
+</div>
+
+<!-- ===== COLOR PICKER ===== -->
+<div class="page" id="page-colorpicker">
+  <div class="content" style="max-width:720px;margin:0 auto;padding:26px 36px 60px">
+    <div class="breadcrumb"><a href="#home">Home</a> / <span>Color Picker</span></div>
+    <h1>Color Picker</h1>
+    <p class="lead">Pick a colour and copy HEX, RGB, or HSL values.</p>
+    <div class="color-demo">
+      <div>
+        <input type="color" id="cpInput" value="#04aa6d" style="width:120px;height:48px;padding:0;border:none;cursor:pointer" title="Pick colour">
+      </div>
+      <div class="color-swatch" id="cpSwatch" style="background:#04aa6d"></div>
+      <div class="color-values">
+        <p><strong>HEX:</strong> <span id="cpHex">#04AA6D</span></p>
+        <p><strong>RGB:</strong> <span id="cpRgb">rgb(4, 170, 109)</span></p>
+        <p><strong>HSL:</strong> <span id="cpHsl">hsl(157, 95%, 34%)</span></p>
+        <button type="button" id="cpCopyHex">Copy HEX</button>
+        <button type="button" id="cpCopyRgb">Copy RGB</button>
+      </div>
+    </div>
+    <div class="note"><strong>Tip:</strong> Use these values in CSS: <code>color: <span id="cpHexInline">#04aa6d</span>;</code></div>
+  </div>
+</div>
+
+<!-- ===== TEMPLATES ===== -->
+<div class="page" id="page-templates">
+  <div class="content" style="max-width:900px;margin:0 auto;padding:26px 36px 60px">
+    <div class="breadcrumb"><a href="#home">Home</a> / <span>Web Templates</span></div>
+    <h1>Starter templates</h1>
+    <p class="lead">Responsive starter layouts you can copy and extend.</p>
+    <h2>Basic responsive page</h2>
+    <div class="try-box">
+      <div class="try-header">Preview <button class="try-btn" type="button" data-run="tpl-try-1">Run &raquo;</button></div>
+      <div class="try-body">
+        <textarea id="tpl-try-1">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+&lt;meta charset="UTF-8"&gt;
+&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+&lt;title&gt;Template&lt;/title&gt;
+&lt;style&gt;
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Verdana, sans-serif; }
+  header, footer { background: #282A35; color: #fff; padding: 16px; text-align: center; }
+  main { max-width: 800px; margin: 0 auto; padding: 24px; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;header&gt;&lt;h1&gt;Site title&lt;/h1&gt;&lt;/header&gt;
+  &lt;main&gt;&lt;p&gt;Your content goes here.&lt;/p&gt;&lt;/main&gt;
+  &lt;footer&gt;&lt;small&gt;&copy; 2026&lt;/small&gt;&lt;/footer&gt;
+&lt;/body&gt;
+&lt;/html&gt;</textarea>
+        <iframe class="try-result" id="tpl-try-1-frame" title="Preview" sandbox="allow-scripts"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== HOW TO SNIPPETS ===== -->
+<div class="page" id="page-howto">
+  <div class="content" style="max-width:900px;margin:0 auto;padding:26px 36px 60px">
+    <div class="breadcrumb"><a href="#home">Home</a> / <span>How To</span></div>
+    <h1>How To — snippets</h1>
+    <p class="lead">Common patterns. Click <b>Copy</b> to copy to the clipboard.</p>
+    <h3>Center a block horizontally</h3>
+    <div class="snippet-row">
+      <pre>.wrap { max-width: 800px; margin: 0 auto; }</pre>
+      <button type="button" class="copy-snippet" data-copy=".wrap { max-width: 800px; margin: 0 auto; }">Copy</button>
+    </div>
+    <h3>Flex row with gap</h3>
+    <div class="snippet-row">
+      <pre>.row { display: flex; gap: 16px; flex-wrap: wrap; }</pre>
+      <button type="button" class="copy-snippet" data-copy=".row { display: flex; gap: 16px; flex-wrap: wrap; }">Copy</button>
+    </div>
+    <h3>Fetch JSON (browser)</h3>
+    <div class="snippet-row">
+      <pre>fetch('/api/data')
+  .then(r =&gt; r.json())
+  .then(console.log)
+  .catch(console.error);</pre>
+      <button type="button" class="copy-snippet" data-copy="fetch('/api/data').then(r => r.json()).then(console.log).catch(console.error);">Copy</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SPACES ===== -->
+<div class="page" id="page-spaces">
+  <div class="content" style="max-width:720px;margin:0 auto;padding:26px 36px 60px">
+    <div class="breadcrumb"><a href="#home">Home</a> / <span>Spaces</span></div>
+    <h1>CodeGeek Spaces</h1>
+    <p class="lead">Spaces is a concept for hosting small projects. On this static demo site, you build locally and deploy anywhere (GitHub Pages, Netlify, etc.).</p>
+    <ol>
+      <li>Create HTML/CSS/JS files on your computer</li>
+      <li>Use the <a href="#html">HTML tutorial</a> and <a href="#templates">templates</a> as a starting point</li>
+      <li>Open <code>index.html</code> in your browser to preview</li>
+    </ol>
+    <p><a href="#templates" style="display:inline-block;margin-top:12px;padding:12px 24px;background:var(--green);color:#fff;border-radius:50px;font-weight:700">Open templates</a></p>
+  </div>
+</div>
+
+<!-- ===== ABOUT / LEGAL ===== -->
+<div class="page" id="page-about">
+  <div class="content" style="max-width:720px;margin:0 auto;padding:26px 36px 60px">
+    <div class="breadcrumb"><a href="#home">Home</a> / <span>About</span></div>
+    <h1>About CodeGeek</h1>
+    <p>CodeGeek Tutorials is a free reference site for learning web technologies. Content is structured for clarity and includes runnable examples where possible.</p>
+    <p>This site runs entirely in your browser — no server required for the lessons you see here.</p>
+  </div>
+</div>
+<div class="page" id="page-privacy">
+  <div class="content" style="max-width:720px;margin:0 auto;padding:26px 36px 60px">
+    <div class="breadcrumb"><a href="#home">Home</a> / <span>Privacy</span></div>
+    <h1>Privacy Policy</h1>
+    <p>CodeGeek does not collect personal data on this static tutorial site. Theme preference (light/dark) may be stored locally in your browser using <code>localStorage</code> only.</p>
+    <p>Your use of this site is at your own discretion.</p>
+  </div>
+</div>
+<div class="page" id="page-terms">
+  <div class="content" style="max-width:720px;margin:0 auto;padding:26px 36px 60px">
+    <div class="breadcrumb"><a href="#home">Home</a> / <span>Terms of Use</span></div>
+    <h1>Terms of Use</h1>
+    <p>Examples and code snippets are provided for education. You may copy and adapt them in your own projects. CodeGeek is not responsible for how code is used in production systems.</p>
+  </div>
+</div>
+<div class="page" id="page-contact">
+  <div class="content" style="max-width:720px;margin:0 auto;padding:26px 36px 60px">
+    <div class="breadcrumb"><a href="#home">Home</a> / <span>Contact</span></div>
+    <h1>Contact</h1>
+    <p>For feedback about CodeGeek Tutorials, use the issue tracker of the project repository where this site is hosted, or discuss with your instructor if you are using this material for coursework.</p>
+    <p>There is no commercial support inbox for this demo.</p>
+  </div>
+</div>
+
+<!-- ===== DYNAMIC TOPIC TUTORIALS (JS fills sidebar + panels) ===== -->
+<div class="page" id="page-topic">
+  <nav class="sidebar" id="topic-sidebar"></nav>
+  <div class="content" id="topic-content"></div>
+</div>
+
 <!-- ===== FOOTER ===== -->
 <footer>
-  <a href="#" onclick="return false;">About</a>
-  <a href="#" onclick="return false;">Privacy Policy</a>
-  <a href="#" onclick="return false;">Terms of Use</a>
-  <a href="#" onclick="return false;">Contact Us</a>
+  <a href="#about">About</a>
+  <a href="#privacy">Privacy Policy</a>
+  <a href="#terms">Terms of Use</a>
+  <a href="#contact">Contact Us</a>
   <div class="copy">CodeGeek is optimised for learning. Examples might be simplified to improve reading.<br>&copy; 1999-<span id="yr"></span> CodeGeek Tutorials. All Rights Reserved.</div>
 </footer>
 
 <script>
 (function () {
-  var pages = { home: 'page-home', html: 'page-html', css: 'page-css', js: 'page-js', sql: 'page-sql', python: 'page-python' };
-  var pageTitles = { home: 'CodeGeek - Learn to Code', html: 'HTML Tutorial', css: 'CSS Tutorial', js: 'JavaScript Tutorial', sql: 'SQL Tutorial', python: 'Python Tutorial' };
+  var ROUTES = {
+    home: 'page-home', html: 'page-html', css: 'page-css', js: 'page-js', sql: 'page-sql', python: 'page-python',
+    references: 'page-references', exercises: 'page-exercises', certificates: 'page-certificates',
+    colorpicker: 'page-colorpicker', templates: 'page-templates', howto: 'page-howto', spaces: 'page-spaces',
+    about: 'page-about', privacy: 'page-privacy', terms: 'page-terms', contact: 'page-contact'
+  };
+  var TITLES = {
+    home: 'CodeGeek - Learn to Code', html: 'HTML Tutorial', css: 'CSS Tutorial', js: 'JavaScript Tutorial',
+    sql: 'SQL Tutorial', python: 'Python Tutorial', references: 'References', exercises: 'Exercises',
+    certificates: 'Certificates', colorpicker: 'Color Picker', templates: 'Web Templates', howto: 'How To',
+    spaces: 'Spaces', about: 'About', privacy: 'Privacy Policy', terms: 'Terms of Use', contact: 'Contact'
+  };
 
-  function showPage(key) {
-    Object.values(pages).forEach(function (id) {
-      var el = document.getElementById(id);
-      if (el) el.classList.toggle('active', id === pages[key]);
-    });
-    document.title = (pageTitles[key] || 'CodeGeek') + ' — CodeGeek';
-    if (key !== 'home') window.scrollTo(0, 0);
+  var TOPICS = {};
+  function addTopic(key, title, aTitle, aCode, bTitle, bCode) {
+    TOPICS[key] = {
+      title: title,
+      panels: [
+        { id: key + '-intro', nav: 'Introduction', kw: key + ' intro start basics ' + title.toLowerCase(),
+          body: '<h1>' + title + ' — Introduction</h1><p class="lead">Overview and your first steps with ' + title + '.</p><h2>' + aTitle + '</h2><pre>' + aCode + '</pre><div class="note"><strong>Tip:</strong> Run examples in an editor or official playground for this language.</div>' },
+        { id: key + '-more', nav: 'Next steps', kw: key + ' syntax example patterns',
+          body: '<h1>' + bTitle + '</h1><p class="lead">Common patterns you will use often.</p><pre>' + bCode + '</pre><div class="try-box"><div class="try-header">Try HTML note (same tab)</div><div class="try-body"><p style="padding:12px">Use the HTML tutorial for a full <a href="#html">Try It editor</a>.</p></div></div>' }
+      ]
+    };
+  }
+
+  addTopic('java', 'Java', 'Hello World', 'public class Hello {\n  public static void main(String[] args) {\n    System.out.println("Hello");\n  }\n}', 'Types & collections', 'String name = "Ada";\nint n = Integer.parseInt("42");\njava.util.List<String> xs = new java.util.ArrayList<>();\nxs.add("item");');
+  addTopic('php', 'PHP', 'Hello', '&lt;?php\n$name = "World";\necho "Hello, $name!";\n', 'Arrays & functions', '$items = ["a", "b"];\nfunction add($a, $b) { return $a + $b; }\necho add(1, 2);');
+  addTopic('c', 'C', 'Hello', '#include &lt;stdio.h&gt;\nint main(void) {\n  printf("Hello\\n");\n  return 0;\n}', 'Pointers sketch', 'int x = 10;\nint *p = &x;\nprintf("%d\\n", *p);');
+  addTopic('cpp', 'C++', 'Hello', '#include &lt;iostream&gt;\nint main() {\n  std::cout &lt;&lt; "Hello\\n";\n  return 0;\n}', 'Classes', 'class Point {\n public:\n  int x, y;\n};\nPoint p{1, 2};');
+  addTopic('csharp', 'C#', 'Hello', 'using System;\nclass P {\n  static void Main() {\n    Console.WriteLine("Hello");\n  }\n}', 'LINQ idea', 'var nums = new[] {1,2,3};\nvar evens = nums.Where(n =&gt; n % 2 == 0);');
+  addTopic('bootstrap', 'Bootstrap', 'CDN', '&lt;link href="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap.min.css" rel="stylesheet"&gt;\n&lt;div class="container"&gt;&lt;p class="lead"&gt;Hi&lt;/p&gt;&lt;/div&gt;', 'Grid', '&lt;div class="row"&gt;\n  &lt;div class="col-md-6"&gt;A&lt;/div&gt;\n  &lt;div class="col-md-6"&gt;B&lt;/div&gt;\n&lt;/div&gt;');
+  addTopic('react', 'React', 'Function component', 'function Hello({ name }) {\n  return &lt;h1&gt;Hello {name}&lt;/h1&gt;;\n}\nexport default Hello;', 'State hook', 'import { useState } from "react";\nfunction Counter() {\n  const [n, setN] = useState(0);\n  return &lt;button onClick={() =&gt; setN(n + 1)}&gt;{n}&lt;/button&gt;;\n}');
+  addTopic('mysql', 'MySQL', 'SELECT', 'SELECT id, name FROM users\nWHERE active = 1\nORDER BY name\nLIMIT 10;', 'JOIN', 'SELECT o.id, u.email\nFROM orders o\nJOIN users u ON u.id = o.user_id;');
+  addTopic('jquery', 'jQuery', 'Ready & select', '$(function() {\n  $("#btn").on("click", function() {\n    $(".item").toggleClass("open");\n  });\n});', 'AJAX', '$.getJSON("/api/data")\n  .done(function(d) { console.log(d); })\n  .fail(function() { alert("err"); });');
+  addTopic('excel', 'Excel', 'Formula', '=SUM(A1:A10)\n=AVERAGE(B:B)\n=IF(C1&gt;0, "Yes", "No")', 'Tables', 'Convert range to Table (Ctrl+T) for structured references like =Table1[Amount]');
+  addTopic('xml', 'XML', 'Document', '&lt;?xml version="1.0"?&gt;\n&lt;catalog&gt;\n  &lt;book id="1"&gt;\n    &lt;title&gt;Guide&lt;/title&gt;\n  &lt;/book&gt;\n&lt;/catalog&gt;', 'Attributes', '&lt;item sku="A12" qty="3"/&gt;');
+  addTopic('django', 'Django', 'View', 'from django.http import HttpResponse\ndef home(request):\n    return HttpResponse("OK")', 'URL route', 'from django.urls import path\nfrom . import views\nurlpatterns = [\n    path("", views.home),\n]');
+  addTopic('numpy', 'NumPy', 'Array', 'import numpy as np\na = np.array([1, 2, 3])\nb = a * 2\nprint(b.mean())', 'Shape', 'x = np.zeros((3, 4))\ny = x.reshape(2, 6)');
+  addTopic('pandas', 'Pandas', 'DataFrame', 'import pandas as pd\ndf = pd.read_csv("data.csv")\nprint(df.head())', 'Filter', 'df2 = df[df["age"] &gt; 18]\ndf.groupby("city").size()');
+  addTopic('nodejs', 'Node.js', 'Server', 'const http = require("http");\nhttp.createServer((req, res) =&gt; {\n  res.end("OK");\n}).listen(3000);', 'FS', 'const fs = require("fs");\nfs.readFile("a.txt", "utf8", (e, d) =&gt; console.log(d));');
+  addTopic('dsa', 'DSA', 'Big-O', '// O(n) scan\nfunction max(arr) {\n  let m = arr[0];\n  for (let i = 1; i &lt; arr.length; i++)\n    if (arr[i] &gt; m) m = arr[i];\n  return m;\n}', 'Binary search', 'function bs(a, t) {\n  let lo = 0, hi = a.length - 1;\n  while (lo &lt;= hi) {\n    const mid = (lo + hi) &gt;&gt; 1;\n    if (a[mid] === t) return mid;\n    if (a[mid] &lt; t) lo = mid + 1;\n    else hi = mid - 1;\n  }\n  return -1;\n}');
+  addTopic('typescript', 'TypeScript', 'Types', 'interface User {\n  id: number;\n  name: string;\n}\nconst u: User = { id: 1, name: "Ada" };', 'Union & narrowing', 'type Id = string | number;\nfunction fmt(x: Id) {\n  return typeof x === "number" ? x.toFixed(0) : x;\n}');
+  addTopic('git', 'Git', 'Basics', 'git init\ngit add .\ngit commit -m "msg"\ngit branch -M main\ngit remote add origin URL\ngit push -u origin main', 'Branch', 'git checkout -b feature\ngit merge main');
+  addTopic('mongodb', 'MongoDB', 'Find', 'db.users.find({ active: true }).limit(10)', 'Insert', 'db.orders.insertOne({ userId: 1, total: 9.99, at: new Date() })');
+  addTopic('r', 'R', 'Vectors', 'x &lt;- c(1, 2, 3)\nmean(x)\nsummary(x)', 'Data frame', 'df &lt;- read.csv("data.csv")\nsubset(df, age &gt; 18)');
+  addTopic('go', 'Go', 'Hello', 'package main\nimport "fmt"\nfunc main() { fmt.Println("Hello") }', 'Goroutine sketch', 'go func() { fmt.Println("async") }()');
+  addTopic('kotlin', 'Kotlin', 'Hello', 'fun main() {\n  println("Hello")\n}', 'Null safety', 'var s: String? = null\nval len = s?.length ?: 0');
+  addTopic('rust', 'Rust', 'Hello', 'fn main() {\n  println!("Hello");\n}', 'Ownership comment', 'let s = String::from("hi");\nlet t = s; // move\n// println!("{}", s); // would not compile');
+
+  function findTopicKey(hash) {
+    if (!hash) return null;
+    var keys = Object.keys(TOPICS).sort(function (a, b) { return b.length - a.length; });
+    for (var i = 0; i < keys.length; i++) {
+      var k = keys[i];
+      if (hash === k || hash.indexOf(k + '-') === 0) return k;
+    }
+    return null;
+  }
+
+  function hideAllPages() {
+    document.querySelectorAll('.page').forEach(function (p) { p.classList.remove('active'); });
+  }
+
+  function showStatic(routeKey) {
+    hideAllPages();
+    var pid = ROUTES[routeKey];
+    if (pid) {
+      var el = document.getElementById(pid);
+      if (el) el.classList.add('active');
+    }
+    document.title = (TITLES[routeKey] || 'CodeGeek') + ' — CodeGeek';
+    if (routeKey !== 'home') window.scrollTo(0, 0);
   }
 
   function showPanel(panelId) {
@@ -1165,50 +1476,211 @@ print(square(5))  # 25</pre>
     var crumb = page.querySelector('.crumb-current');
     var activeLink = page.querySelector('.sidebar a.active');
     if (crumb && activeLink) crumb.textContent = activeLink.textContent;
-    page.querySelector('.content')?.scrollTo(0, 0);
+    var c = page.querySelector('.content');
+    if (c && c.scrollTo) c.scrollTo(0, 0);
+  }
+
+  function renderTopic(tk, panelId) {
+    var T = TOPICS[tk];
+    if (!T) return;
+    var panels = T.panels;
+    var valid = panels.some(function (p) { return p.id === panelId; });
+    var active = valid ? panelId : panels[0].id;
+    var sb = document.getElementById('topic-sidebar');
+    var tc = document.getElementById('topic-content');
+    var fid = 'topic-filter-inp';
+    sb.innerHTML = '<input type="text" class="search" id="' + fid + '" placeholder="Filter…" autocomplete="off" aria-label="Filter sidebar"><h4>' + T.title + ' Tutorial</h4>';
+    panels.forEach(function (p) {
+      var a = document.createElement('a');
+      a.href = '#' + p.id;
+      a.setAttribute('data-kw', p.kw);
+      a.textContent = p.nav;
+      if (p.id === active) a.className = 'active';
+      sb.appendChild(a);
+    });
+    var cur = panels.filter(function (x) { return x.id === active; })[0];
+    var crumb = '<div class="breadcrumb"><a href="#home">Home</a> / <a href="#' + tk + '">' + T.title + '</a> / <span class="crumb-current">' + (cur ? cur.nav : '') + '</span></div>';
+    tc.innerHTML = crumb + panels.map(function (p) {
+      return '<div class="panel' + (p.id === active ? ' active' : '') + '" id="' + p.id + '">' + p.body + '</div>';
+    }).join('');
+    var inp = document.getElementById(fid);
+    if (inp) {
+      inp.addEventListener('input', function () {
+        var q = inp.value.trim().toLowerCase();
+        sb.querySelectorAll('a[data-kw]').forEach(function (a) {
+          var txt = (a.getAttribute('data-kw') || '') + ' ' + a.textContent;
+          a.classList.toggle('hidden', q.length > 0 && txt.toLowerCase().indexOf(q) === -1);
+        });
+      });
+    }
+    tc.querySelectorAll('.try-btn').forEach(function (b) { b.click(); });
+  }
+
+  function rgbToHsl(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    var max = Math.max(r, g, b), min = Math.min(r, g, b);
+    var h, s, l = (max + min) / 2;
+    if (max === min) { h = s = 0; }
+    else {
+      var d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = ((g - b) / d + (g < b ? 6 : 0)); break;
+        case g: h = (b - r) / d + 2; break;
+        default: h = (r - g) / d + 4;
+      }
+      h /= 6;
+    }
+    return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+  }
+
+  function initColorPicker() {
+    var inp = document.getElementById('cpInput');
+    if (!inp) return;
+    function sync() {
+      var hex = inp.value;
+      var r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+      var hsl = rgbToHsl(r, g, b);
+      var sw = document.getElementById('cpSwatch');
+      if (sw) sw.style.background = hex;
+      var elHex = document.getElementById('cpHex');
+      if (elHex) elHex.textContent = hex.toUpperCase();
+      var elRgb = document.getElementById('cpRgb');
+      if (elRgb) elRgb.textContent = 'rgb(' + r + ', ' + g + ', ' + b + ')';
+      var elHsl = document.getElementById('cpHsl');
+      if (elHsl) elHsl.textContent = 'hsl(' + hsl.h + ', ' + hsl.s + '%, ' + hsl.l + '%)';
+      var il = document.getElementById('cpHexInline');
+      if (il) il.textContent = hex;
+    }
+    if (inp.dataset.bound) { sync(); return; }
+    inp.dataset.bound = '1';
+    inp.addEventListener('input', sync);
+    sync();
+    function copy(sel) {
+      var el = document.querySelector(sel);
+      if (el && navigator.clipboard) navigator.clipboard.writeText(el.textContent);
+    }
+    var b1 = document.getElementById('cpCopyHex');
+    var b2 = document.getElementById('cpCopyRgb');
+    if (b1) b1.addEventListener('click', function () { copy('#cpHex'); });
+    if (b2) b2.addEventListener('click', function () { copy('#cpRgb'); });
+  }
+
+  function resetQuizUI() {
+    document.querySelectorAll('.quiz-q').forEach(function (q) { delete q.dataset.answered; });
+    document.querySelectorAll('.quiz-options button').forEach(function (b) {
+      b.disabled = false;
+      b.classList.remove('correct', 'wrong');
+    });
+    var sc = document.getElementById('quiz-score');
+    if (sc) sc.textContent = 'Score: 0 / 3';
   }
 
   function route() {
     var h = (window.location.hash || '#home').slice(1);
-    if (pages[h]) {
-      showPage(h);
-    } else {
-      var panel = document.getElementById(h);
-      if (panel) {
-        var page = panel.closest('.page');
-        if (page) {
-          var key = page.id.replace('page-', '');
-          showPage(key);
-          showPanel(h);
-        }
-      }
-    }
-  }
+    if (!h) { showStatic('home'); return; }
 
-  document.addEventListener('click', function (e) {
-    var a = e.target.closest('a[data-nav], a[data-panel], a[href^="#"]');
-    if (!a) return;
-
-    if (a.dataset.panel) {
-      e.preventDefault();
-      showPanel(a.dataset.panel);
-      window.location.hash = a.dataset.panel;
+    var tk = findTopicKey(h);
+    if (tk) {
+      hideAllPages();
+      var pt = document.getElementById('page-topic');
+      if (pt) pt.classList.add('active');
+      var panelId = h;
+      if (h === tk) panelId = TOPICS[tk].panels[0].id;
+      renderTopic(tk, panelId);
+      document.title = TOPICS[tk].title + ' Tutorial — CodeGeek';
+      window.scrollTo(0, 0);
       return;
     }
 
-    var href = a.getAttribute('href');
-    if (href && href.startsWith('#')) {
-      var key = href.slice(1);
-      if (pages[key]) {
-        e.preventDefault();
-        window.location.hash = key;
-        showPage(key);
-        return;
+    var panelEl = document.getElementById(h);
+    if (panelEl && panelEl.classList.contains('panel')) {
+      var page = panelEl.closest('.page');
+      if (page && page.id && page.id.indexOf('page-') === 0 && page.id !== 'page-topic') {
+        var rKey = page.id.replace('page-', '');
+        if (ROUTES[rKey]) {
+          hideAllPages();
+          page.classList.add('active');
+          showPanel(h);
+          document.title = (TITLES[rKey] || 'CodeGeek') + ' — CodeGeek';
+          window.scrollTo(0, 0);
+          if (rKey === 'colorpicker') initColorPicker();
+          return;
+        }
       }
+    }
+
+    if (ROUTES[h]) {
+      showStatic(h);
+      if (h === 'colorpicker') initColorPicker();
+      if (h === 'exercises') resetQuizUI();
+      return;
+    }
+
+    showStatic('home');
+  }
+
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a[data-panel], a[href^="#"]');
+    if (!a) return;
+    if (a.dataset.panel) {
+      e.preventDefault();
+      window.location.hash = '#' + a.dataset.panel;
+      return;
+    }
+    var href = a.getAttribute('href');
+    if (!href || href === '#') { e.preventDefault(); return; }
+    if (href.charAt(0) === '#') {
+      e.preventDefault();
+      window.location.hash = href;
+    }
+  });
+
+  document.body.addEventListener('click', function (e) {
+    var btn = e.target.closest('.try-btn');
+    if (!btn) return;
+    var taId = btn.getAttribute('data-run');
+    if (!taId) return;
+    var ta = document.getElementById(taId);
+    var frame = document.getElementById(taId + '-frame');
+    if (ta && frame) frame.srcdoc = ta.value;
+  });
+
+  document.body.addEventListener('click', function (e) {
+    var b = e.target.closest('.copy-snippet');
+    if (!b) return;
+    var t = b.getAttribute('data-copy');
+    if (!t || !navigator.clipboard) return;
+    navigator.clipboard.writeText(t).then(function () {
+      b.textContent = 'Copied!';
+      setTimeout(function () { b.textContent = 'Copy'; }, 1600);
+    });
+  });
+
+  document.body.addEventListener('click', function (e) {
+    var btn = e.target.closest('.quiz-options button');
+    if (!btn) return;
+    var q = btn.closest('.quiz-q');
+    if (!q || q.dataset.answered) return;
+    q.dataset.answered = '1';
+    var correct = btn.getAttribute('data-correct') === '1';
+    q.querySelectorAll('button').forEach(function (x) { x.disabled = true; });
+    if (correct) btn.classList.add('correct');
+    else {
+      btn.classList.add('wrong');
+      var ok = q.querySelector('[data-correct="1"]');
+      if (ok) ok.classList.add('correct');
+    }
+    var good = document.querySelectorAll('.quiz-q[data-answered]').length;
+    var sc = document.getElementById('quiz-score');
+    if (sc) {
+      var pts = document.querySelectorAll('.quiz-options button.correct').length;
+      sc.textContent = 'Score: ' + pts + ' / 3';
     }
   });
 
   document.querySelectorAll('.search').forEach(function (input) {
+    if (input.id === 'siteSearch') return;
     var sbId = input.dataset.filter;
     input.addEventListener('input', function () {
       var q = input.value.trim().toLowerCase();
@@ -1221,14 +1693,29 @@ print(square(5))  # 25</pre>
     });
   });
 
-  document.querySelectorAll('.try-btn').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var taId = btn.dataset.run;
-      var ta = document.getElementById(taId);
-      var frame = document.getElementById(taId + '-frame');
-      if (ta && frame) frame.srcdoc = ta.value;
-    });
+  var searchIndex = [];
+  Object.keys(ROUTES).forEach(function (k) {
+    searchIndex.push({ k: k, t: ((TITLES[k] || '') + ' ' + k).toLowerCase() });
   });
+  Object.keys(TOPICS).forEach(function (k) {
+    searchIndex.push({ k: k, t: (TOPICS[k].title + ' ' + k).toLowerCase() });
+  });
+
+  var siteSearch = document.getElementById('siteSearch');
+  if (siteSearch) {
+    siteSearch.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter') return;
+      var q = this.value.trim().toLowerCase();
+      if (!q) return;
+      e.preventDefault();
+      for (var i = 0; i < searchIndex.length; i++) {
+        if (searchIndex[i].t.indexOf(q) >= 0 || searchIndex[i].k.indexOf(q) >= 0) {
+          window.location.hash = '#' + searchIndex[i].k;
+          return;
+        }
+      }
+    });
+  }
 
   var themeBtn = document.getElementById('themeToggle');
   if (themeBtn) {
@@ -1236,9 +1723,14 @@ print(square(5))  # 25</pre>
       document.body.classList.toggle('dark');
       var isDark = document.body.classList.contains('dark');
       themeBtn.innerHTML = isDark ? '&#9788; Light' : '&#9790; Dark';
-      try { localStorage.setItem('cg-theme', isDark ? 'dark' : 'light'); } catch (e) {}
+      try { localStorage.setItem('cg-theme', isDark ? 'dark' : 'light'); } catch (err) {}
     });
-    try { if (localStorage.getItem('cg-theme') === 'dark') { document.body.classList.add('dark'); themeBtn.innerHTML = '&#9788; Light'; } } catch (e) {}
+    try {
+      if (localStorage.getItem('cg-theme') === 'dark') {
+        document.body.classList.add('dark');
+        themeBtn.innerHTML = '&#9788; Light';
+      }
+    } catch (err2) {}
   }
 
   var yr = document.getElementById('yr');
@@ -1246,8 +1738,7 @@ print(square(5))  # 25</pre>
 
   window.addEventListener('hashchange', route);
   route();
-
-  document.querySelectorAll('.try-btn').forEach(function (btn) { btn.click(); });
+  document.querySelectorAll('.page .try-btn').forEach(function (btn) { btn.click(); });
 })();
 </script>
 </body>
