@@ -7,28 +7,72 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8f9fb;color:#1e293b;line-height:1.7}
-/* ---- Decoy: generic reference site (W3-style) ---- */
-#decoy-root{font-family:Verdana,sans-serif;font-size:15px;line-height:1.5;color:#000;background:#E7E9EB;min-height:100vh}
-#decoy-topbar{background:#04AA6D;color:#fff;padding:12px 16px;position:sticky;top:0;z-index:100;box-shadow:0 2px 5px rgba(0,0,0,.12);cursor:default;user-select:none}
+/* ---- Decoy: reference site (multi-page SPA feel) ---- */
+#decoy-root{font-family:Verdana,sans-serif;font-size:15px;line-height:1.55;color:#000;background:#E7E9EB;min-height:100vh;transition:background .2s,color .2s}
+#decoy-root.decoy-dark{background:#1e1e2e;color:#e4e4e7}
+#decoy-root.decoy-dark #decoy-sidebar{background:#252536;border-right-color:#3f3f5a}
+#decoy-root.decoy-dark #decoy-sidebar h4{color:#a1a1aa}
+#decoy-root.decoy-dark #decoy-sidebar a{color:#e4e4e7}
+#decoy-root.decoy-dark #decoy-sidebar a:hover{background:#3f3f5a}
+#decoy-root.decoy-dark #decoy-sidebar a.active{background:#04AA6D;color:#fff}
+#decoy-root.decoy-dark #decoy-main{background:#28283d;color:#e4e4e7}
+#decoy-root.decoy-dark #decoy-main h1,#decoy-root.decoy-dark #decoy-main h2{color:#fafafa}
+#decoy-root.decoy-dark #decoy-main p{color:#d4d4d8}
+#decoy-root.decoy-dark #decoy-main .lead{color:#a1a1aa}
+#decoy-root.decoy-dark #decoy-main pre,#decoy-root.decoy-dark #decoy-main code{background:#1a1a24;color:#e4e4e7}
+#decoy-root.decoy-dark #decoy-main .note{background:#3f3f2e;border-color:#ca8a04;color:#fef9c3}
+#decoy-root.decoy-dark #decoy-subbar{background:#252536;border-color:#3f3f5a}
+#decoy-root.decoy-dark #decoy-search{background:#1e1e2e;color:#fff;border-color:#52525b}
+#decoy-root.decoy-dark .decoy-breadcrumb{color:#a1a1aa}
+#decoy-root.decoy-dark #decoy-footer{background:#252536;border-color:#3f3f5a;color:#a1a1aa}
+#decoy-header{position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+#decoy-topbar{background:#04AA6D;color:#fff;padding:14px 20px;cursor:default}
 #decoy-topbar-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
-#decoy-logo{font-size:1.35rem;font-weight:700;color:#fff;text-decoration:none;letter-spacing:-.5px}
-#decoy-logo:hover{color:#f1f1f1}
-#decoy-tagline{font-size:.75rem;opacity:.95}
-#decoy-layout{display:flex;max-width:1200px;margin:0 auto;min-height:calc(100vh - 52px)}
-#decoy-sidebar{width:230px;background:#E7E9EB;padding:20px 12px 40px 16px;flex-shrink:0;border-right:1px solid #d4d4d4}
-#decoy-sidebar h4{font-size:13px;margin:18px 0 8px;color:#000}
+#decoy-logo{font-size:1.4rem;font-weight:700;color:#fff;text-decoration:none;letter-spacing:-.5px}
+#decoy-logo:hover{color:#f0fdf4}
+#decoy-tagline{font-size:.78rem;opacity:.92;max-width:420px;line-height:1.35}
+#decoy-subbar{background:#fff;border-bottom:1px solid #d4d4d4;padding:10px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;max-width:1200px;margin:0 auto}
+#decoy-search{flex:1;min-width:180px;max-width:420px;padding:8px 12px;border:1px solid #ccc;border-radius:4px;font-size:14px;font-family:inherit}
+#decoy-theme{padding:8px 14px;border:1px solid #ccc;border-radius:4px;background:#f1f1f1;cursor:pointer;font-size:13px;font-family:inherit}
+#decoy-theme:hover{background:#e5e5e5}
+#decoy-layout{display:flex;max-width:1200px;margin:0 auto;min-height:calc(100vh - 120px)}
+#decoy-sidebar{width:240px;background:#E7E9EB;padding:22px 14px 48px 18px;flex-shrink:0;border-right:1px solid #d4d4d4}
+#decoy-sidebar h4{font-size:12px;margin:20px 0 8px;color:#000;text-transform:uppercase;letter-spacing:.04em}
 #decoy-sidebar h4:first-child{margin-top:0}
-#decoy-sidebar a{display:block;padding:4px 8px;color:inherit;text-decoration:none;font-size:14px;border-radius:4px}
-#decoy-sidebar a:hover{background:#ccc}
-#decoy-main{flex:1;background:#fff;padding:28px 32px 60px;max-width:100%}
-#decoy-main h1{font-size:32px;font-weight:400;margin-bottom:12px}
-#decoy-main .lead{color:#555;margin-bottom:20px;font-size:16px}
-#decoy-main h2{font-size:24px;font-weight:400;margin:28px 0 12px;border-bottom:1px solid #E7E9EB;padding-bottom:6px}
+#decoy-sidebar a.decoy-nav{display:block;padding:6px 10px;color:inherit;text-decoration:none;font-size:14px;border-radius:4px;border-left:3px solid transparent}
+#decoy-sidebar a.decoy-nav:hover{background:rgba(0,0,0,.06)}
+#decoy-sidebar a.decoy-nav.active{background:#d4d4d4;border-left-color:#04AA6D;font-weight:600}
+#decoy-sidebar a.decoy-nav.decoy-hidden{display:none}
+#decoy-main{flex:1;background:#fff;padding:24px 36px 72px;max-width:100%;min-width:0}
+.decoy-breadcrumb{font-size:13px;color:#666;margin-bottom:18px}
+.decoy-breadcrumb a{color:#04AA6D;text-decoration:none}
+.decoy-breadcrumb a:hover{text-decoration:underline}
+.decoy-panel{display:none}
+.decoy-panel.active{display:block}
+#decoy-main h1{font-size:30px;font-weight:400;margin-bottom:10px}
+#decoy-main .lead{color:#555;margin-bottom:18px;font-size:16px}
+#decoy-main h2{font-size:22px;font-weight:400;margin:26px 0 10px;border-bottom:1px solid #E7E9EB;padding-bottom:6px}
+#decoy-main h3{font-size:17px;margin:18px 0 8px;font-weight:600}
 #decoy-main p{margin-bottom:14px;color:#333}
+#decoy-main ul,#decoy-main ol{margin:10px 0 14px 22px}
+#decoy-main li{margin-bottom:6px}
 #decoy-main .note{background:#ffffcc;border-left:4px solid #ffeb3b;padding:12px 16px;margin:16px 0;font-size:14px}
 #decoy-main code{background:#f1f1f1;padding:2px 6px;font-family:Consolas,'Courier New',monospace;font-size:14px}
-#decoy-main pre{background:#f1f1f1;border-left:4px solid #04AA6D;padding:14px 16px;overflow-x:auto;margin:14px 0;font-family:Consolas,monospace;font-size:14px}
-#decoy-footer{text-align:center;padding:24px;color:#666;font-size:13px;border-top:1px solid #ddd;background:#E7E9EB}
+#decoy-main pre{background:#f1f1f1;border-left:4px solid #04AA6D;padding:14px 16px;overflow-x:auto;margin:14px 0;font-family:Consolas,monospace;font-size:13px;line-height:1.45}
+#decoy-main table{border-collapse:collapse;width:100%;max-width:560px;margin:14px 0;font-size:14px}
+#decoy-main th,#decoy-main td{border:1px solid #ddd;padding:8px 12px;text-align:left}
+#decoy-main th{background:#E7E9EB}
+.decoy-try{margin:18px 0;border:1px solid #ddd;border-radius:6px;overflow:hidden}
+.decoy-try-h{padding:8px 12px;background:#E7E9EB;font-size:13px;font-weight:600}
+.decoy-try-body{padding:12px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start}
+.decoy-try-body textarea{width:100%;min-height:100px;font-family:Consolas,monospace;font-size:13px;padding:10px;border:1px solid #ccc;border-radius:4px;resize:vertical}
+.decoy-run{background:#04AA6D;color:#fff;border:none;padding:10px 20px;border-radius:4px;cursor:pointer;font-size:14px;font-family:inherit}
+.decoy-run:hover{background:#059862}
+.decoy-iframe{width:100%;min-height:120px;border:1px solid #ccc;border-radius:4px;background:#fff}
+#decoy-footer{text-align:center;padding:20px 16px;color:#666;font-size:13px;border-top:1px solid #ddd;background:#E7E9EB}
+#decoy-footer a{color:#04AA6D;margin:0 8px;text-decoration:none}
+#decoy-footer a:hover{text-decoration:underline}
+@media(max-width:800px){#decoy-layout{flex-direction:column}#decoy-sidebar{width:100%;border-right:none;border-bottom:1px solid #d4d4d4}}
 #tutorial-root[hidden]{display:none!important}
 .header{background:linear-gradient(135deg,#0f172a,#1e3a5f);color:#fff;padding:16px 24px;position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;gap:16px}
 .header h1{font-size:1.15rem;font-weight:600}
@@ -60,56 +104,171 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <body>
 
 <div id="decoy-root">
-  <header id="decoy-topbar">
-    <div id="decoy-topbar-inner">
-      <a href="#" id="decoy-logo" onclick="return false;">CodeLearn</a>
-      <span id="decoy-tagline">The world&apos;s largest web developer reference</span>
+  <header id="decoy-header">
+    <div id="decoy-topbar">
+      <div id="decoy-topbar-inner">
+        <a href="#" id="decoy-logo" onclick="return false;">CodeLearn</a>
+        <span id="decoy-tagline">Free tutorials on HTML, CSS, JavaScript, SQL, PHP, Python — and more. No registration required.</span>
+      </div>
+    </div>
+    <div id="decoy-subbar">
+      <input type="search" id="decoy-search" placeholder="Filter sidebar (e.g. flex, grid, json)..." autocomplete="off" aria-label="Filter tutorials" />
+      <button type="button" id="decoy-theme" title="Toggle light/dark">Light / Dark</button>
     </div>
   </header>
   <div id="decoy-layout">
     <nav id="decoy-sidebar" aria-label="Tutorial navigation">
       <h4>HTML</h4>
-      <a href="#">HTML Tutorial</a>
-      <a href="#">HTML Forms</a>
-      <a href="#">HTML5</a>
+      <a href="#" class="decoy-nav active" data-panel="panel-html" data-keywords="html tutorial markup elements">HTML Tutorial</a>
+      <a href="#" class="decoy-nav" data-panel="panel-html-forms" data-keywords="html forms input submit">HTML Forms</a>
+      <a href="#" class="decoy-nav" data-panel="panel-html5" data-keywords="html5 semantic video canvas">HTML5 Semantics</a>
       <h4>CSS</h4>
-      <a href="#">CSS Tutorial</a>
-      <a href="#">CSS Flexbox</a>
-      <a href="#">CSS Grid</a>
+      <a href="#" class="decoy-nav" data-panel="panel-css" data-keywords="css stylesheet selectors box">CSS Tutorial</a>
+      <a href="#" class="decoy-nav" data-panel="panel-flex" data-keywords="css flexbox flex align">CSS Flexbox</a>
+      <a href="#" class="decoy-nav" data-panel="panel-grid" data-keywords="css grid template">CSS Grid</a>
       <h4>JavaScript</h4>
-      <a href="#">JS Tutorial</a>
-      <a href="#">JS JSON</a>
-      <a href="#">JS AJAX</a>
-      <h4>Backend</h4>
-      <a href="#">SQL Tutorial</a>
-      <a href="#">Node.js Intro</a>
+      <a href="#" class="decoy-nav" data-panel="panel-js" data-keywords="javascript js dom variables">JavaScript Tutorial</a>
+      <a href="#" class="decoy-nav" data-panel="panel-json" data-keywords="json parse stringify">JSON</a>
+      <a href="#" class="decoy-nav" data-panel="panel-ajax" data-keywords="ajax fetch xhr async">Fetch &amp; AJAX</a>
+      <h4>Data &amp; server</h4>
+      <a href="#" class="decoy-nav" data-panel="panel-sql" data-keywords="sql database select query">SQL Tutorial</a>
+      <a href="#" class="decoy-nav" data-panel="panel-node" data-keywords="node js npm require">Node.js Intro</a>
     </nav>
     <main id="decoy-main">
-      <h1>HTML Tutorial</h1>
-      <p class="lead">HTML is the standard markup language for Web pages. With HTML you can create your own website.</p>
-      <div class="note"><strong>Tip:</strong> This page teaches the basics of HTML. Each section builds on the previous one.</div>
-      <h2>What is HTML?</h2>
-      <p>HTML stands for Hyper Text Markup Language. HTML is the standard markup language for creating Web pages. HTML describes the structure of a Web page.</p>
-      <h2>A Simple HTML Document</h2>
-      <pre>&lt;!DOCTYPE html&gt;
-&lt;html&gt;
+      <div class="decoy-breadcrumb" id="decoy-crumb"><a href="#">Home</a> / <span id="decoy-crumb-here">HTML Tutorial</span></div>
+
+      <article id="panel-html" class="decoy-panel active"> 
+        <h1>HTML Tutorial</h1>
+        <p class="lead">HTML (HyperText Markup Language) is the language of the web. Browsers parse HTML to build the document tree (DOM) that you style with CSS and script with JavaScript.</p>
+        <div class="note"><strong>Tip:</strong> Use <code>View Source</code> on any real page to see how authors structure markup in practice.</div>
+        <h2>Document structure</h2>
+        <p>Every HTML5 document should declare a doctype, wrap content in <code>&lt;html&gt;</code>, split metadata (<code>&lt;head&gt;</code>) from visible content (<code>&lt;body&gt;</code>), and specify a language on the root element for accessibility.</p>
+        <pre>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
 &lt;head&gt;
-&lt;title&gt;Page Title&lt;/title&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+  &lt;title&gt;Page title&lt;/title&gt;
 &lt;/head&gt;
 &lt;body&gt;
-
-&lt;h1&gt;My First Heading&lt;/h1&gt;
-&lt;p&gt;My first paragraph.&lt;/p&gt;
-
+  &lt;h1&gt;Main heading&lt;/h1&gt;
+  &lt;p&gt;Paragraph text.&lt;/p&gt;
 &lt;/body&gt;
 &lt;/html&gt;</pre>
-      <h2>HTML Elements</h2>
-      <p>An HTML element is defined by a start tag, some content, and an end tag: <code>&lt;tagname&gt;Content goes here...&lt;/tagname&gt;</code></p>
-      <h2>HTML Attributes</h2>
-      <p>All HTML elements can have attributes. Attributes provide additional information about elements. Attributes are always specified in the start tag.</p>
+        <h2>Common elements</h2>
+        <p>Headings (<code>h1</code>–<code>h6</code>) form an outline. Paragraphs use <code>&lt;p&gt;</code>. Lists use <code>&lt;ul&gt;</code>/<code>&lt;ol&gt;</code> with <code>&lt;li&gt;</code>. Links use <code>&lt;a href="..."&gt;</code>. Images use <code>&lt;img src="..." alt="..."&gt;</code> — always include meaningful <code>alt</code> text.</p>
+        <h2>Try it</h2>
+        <p>Edit the snippet (or reset) and click <strong>Run</strong> to preview in a sandboxed frame. No network requests are made.</p>
+        <div class="decoy-try">
+          <div class="decoy-try-h">Live preview</div>
+          <div class="decoy-try-body">
+            <textarea id="decoy-html-try" spellcheck="false">&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;&lt;style&gt;body{font-family:sans-serif;padding:16px;background:#f5f5f5}&lt;/style&gt;&lt;/head&gt;&lt;body&gt;&lt;h1&gt;Hello&lt;/h1&gt;&lt;p&gt;This is a sandbox preview.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</textarea>
+            <button type="button" class="decoy-run" id="decoy-html-run">Run</button>
+            <iframe class="decoy-iframe" id="decoy-html-frame" title="Preview" sandbox="allow-scripts"></iframe>
+          </div>
+        </div>
+      </article>
+
+      <article id="panel-html-forms" class="decoy-panel">
+        <h1>HTML Forms</h1>
+        <p class="lead">Forms collect user input. The <code>&lt;form&gt;</code> element wraps controls, <code>action</code> and <code>method</code> define where and how data is sent (GET or POST).</p>
+        <h2>Input types</h2>
+        <p><code>type="text"</code>, <code>email</code>, <code>tel</code>, <code>number</code>, <code>date</code>, <code>checkbox</code>, <code>radio</code>, <code>file</code>, and <code>submit</code> are common. Use <code>&lt;label for="id"&gt;</code> tied to input <code>id</code> for accessibility.</p>
+        <pre>&lt;form action="/submit" method="post"&gt;
+  &lt;label for="email"&gt;Email&lt;/label&gt;
+  &lt;input id="email" name="email" type="email" required&gt;
+  &lt;button type="submit"&gt;Send&lt;/button&gt;
+&lt;/form&gt;</pre>
+      </article>
+
+      <article id="panel-html5" class="decoy-panel">
+        <h1>HTML5 semantics</h1>
+        <p class="lead">HTML5 introduces elements that describe meaning: <code>&lt;header&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code>, <code>&lt;article&gt;</code>, <code>&lt;section&gt;</code>, <code>&lt;aside&gt;</code>, <code>&lt;footer&gt;</code>. They help screen readers and SEO without changing default styling much.</p>
+        <h2>When to use <code>section</code> vs <code>article</code></h2>
+        <p>Use <code>article</code> for self-contained content (a blog post, a card). Use <code>section</code> for thematic grouping inside a document. A page can have multiple articles; each article can contain sections.</p>
+      </article>
+
+      <article id="panel-css" class="decoy-panel">
+        <h1>CSS Tutorial</h1>
+        <p class="lead">CSS (Cascading Style Sheets) sets presentation: colours, layout, typography, and animations. Rules apply selectors to declaration blocks.</p>
+        <h2>Selectors</h2>
+        <p>Element (<code>p</code>), class (<code>.btn</code>), ID (<code>#app</code>), attribute (<code>[type="checkbox"]</code>), and combinators (<code>nav a</code>, <code>.card &gt; h2</code>) target nodes in the DOM.</p>
+        <div class="note">Specificity: inline styles &gt; IDs &gt; classes &gt; elements. Equal rules — last one wins unless <code>!important</code> (avoid when possible).</div>
+        <h2>Box model</h2>
+        <p>Every box has content, padding, border, and margin. <code>box-sizing: border-box</code> is widely used so width includes padding and border.</p>
+      </article>
+
+      <article id="panel-flex" class="decoy-panel">
+        <h1>CSS Flexbox</h1>
+        <p class="lead">Flexbox lays out one-dimensional rows or columns. Set <code>display: flex</code> on a container, then use <code>justify-content</code> and <code>align-items</code> to distribute space.</p>
+        <pre>.row { display: flex; flex-wrap: wrap; gap: 12px; }
+.item { flex: 1 1 200px; }</pre>
+      </article>
+
+      <article id="panel-grid" class="decoy-panel">
+        <h1>CSS Grid</h1>
+        <p class="lead">Grid is for two-dimensional layouts. Define tracks with <code>grid-template-columns</code> and place items with <code>grid-column</code> / <code>grid-row</code> or named areas.</p>
+        <pre>.layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 16px;
+}</pre>
+      </article>
+
+      <article id="panel-js" class="decoy-panel">
+        <h1>JavaScript Tutorial</h1>
+        <p class="lead">JavaScript runs in the browser and on Node.js. It is dynamically typed, supports first-class functions, and uses prototypes (or classes) for object-oriented patterns.</p>
+        <h2>Variables</h2>
+        <p><code>let</code> and <code>const</code> are block-scoped; prefer <code>const</code> unless reassignment is needed. <code>var</code> is function-scoped and largely obsolete in new code.</p>
+        <h2>DOM</h2>
+        <p><code>document.querySelector</code> returns the first match; <code>querySelectorAll</code> returns a static NodeList. Listen for events with <code>addEventListener</code>.</p>
+      </article>
+
+      <article id="panel-json" class="decoy-panel">
+        <h1>JSON</h1>
+        <p class="lead">JSON (JavaScript Object Notation) is a text format for data exchange. In JS, <code>JSON.parse(str)</code> parses a string; <code>JSON.stringify(obj)</code> serialises an object.</p>
+        <pre>const data = JSON.parse('{"ok":true,"x":42}');
+console.log(data.x);</pre>
+      </article>
+
+      <article id="panel-ajax" class="decoy-panel">
+        <h1>Fetch &amp; AJAX</h1>
+        <p class="lead">The Fetch API returns Promises. Use <code>async/await</code> or <code>.then()</code> to handle responses. Check <code>response.ok</code> before parsing JSON.</p>
+        <pre>async function load() {
+  const r = await fetch('/api/data');
+  if (!r.ok) throw new Error(r.status);
+  return r.json();
+}</pre>
+      </article>
+
+      <article id="panel-sql" class="decoy-panel">
+        <h1>SQL Tutorial</h1>
+        <p class="lead">SQL queries relational databases. <code>SELECT</code> reads rows; <code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code> change data. Use <code>WHERE</code> to filter and <code>JOIN</code> to combine tables.</p>
+        <div class="note">Parameterised queries (prepared statements) prevent SQL injection — never concatenate raw user input into SQL strings.</div>
+        <pre>SELECT u.name, COUNT(o.id) AS orders
+FROM users u
+LEFT JOIN orders o ON o.user_id = u.id
+GROUP BY u.id;</pre>
+      </article>
+
+      <article id="panel-node" class="decoy-panel">
+        <h1>Node.js intro</h1>
+        <p class="lead">Node.js runs JavaScript on the server with the V8 engine. It uses a non-blocking event loop and <code>npm</code> for packages. Common patterns: HTTP servers with <code>http</code> or frameworks like Express; <code>fs</code> for files; <code>path</code> for paths.</p>
+        <pre>const http = require('http');
+http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('OK');
+}).listen(3000);</pre>
+      </article>
     </main>
   </div>
-  <footer id="decoy-footer">References and exercises are free to use. Optimized for learning.</footer>
+  <footer id="decoy-footer">
+    <span id="decoy-footer-copy">© <span id="decoy-year"></span> CodeLearn — free reference</span>
+    <a href="#">About</a>
+    <a href="#">Privacy</a>
+    <a href="#">Contact</a>
+    <div style="margin-top:10px;font-size:12px;opacity:.85">Updated weekly · Works offline after first load (cache)</div>
+  </footer>
 </div>
 
 <div id="tutorial-root" hidden>
@@ -3210,9 +3369,23 @@ export default Login;</textarea>
   var count = 0;
   var timer = null;
 
+  var panelTitles = {
+    'panel-html': 'HTML Tutorial',
+    'panel-html-forms': 'HTML Forms',
+    'panel-html5': 'HTML5 Semantics',
+    'panel-css': 'CSS Tutorial',
+    'panel-flex': 'CSS Flexbox',
+    'panel-grid': 'CSS Grid',
+    'panel-js': 'JavaScript Tutorial',
+    'panel-json': 'JSON',
+    'panel-ajax': 'Fetch & AJAX',
+    'panel-sql': 'SQL Tutorial',
+    'panel-node': 'Node.js Intro'
+  };
+
   function bindTriple(el, onTriple) {
     if (!el) return;
-    el.addEventListener('click', function (e) {
+    el.addEventListener('click', function () {
       count++;
       clearTimeout(timer);
       timer = setTimeout(function () { count = 0; }, tripleWindow);
@@ -3233,21 +3406,111 @@ export default Login;</textarea>
   function showDecoy() {
     tutorial.hidden = true;
     decoy.style.display = '';
-    document.title = DECOY_TITLE;
+    var h = window.location.hash.slice(1);
+    if (h && panelTitles[h]) document.title = panelTitles[h] + ' — CodeLearn';
+    else document.title = DECOY_TITLE;
     window.scrollTo(0, 0);
   }
+
+  function showDecoyPanel(panelId) {
+    var panels = document.querySelectorAll('.decoy-panel');
+    panels.forEach(function (p) { p.classList.toggle('active', p.id === panelId); });
+    document.querySelectorAll('#decoy-sidebar a.decoy-nav').forEach(function (a) {
+      a.classList.toggle('active', a.getAttribute('data-panel') === panelId);
+    });
+    var crumb = document.getElementById('decoy-crumb-here');
+    if (crumb) crumb.textContent = panelTitles[panelId] || panelId;
+    window.location.hash = panelId;
+    document.title = (panelTitles[panelId] || 'Tutorial') + ' — CodeLearn';
+    var main = document.getElementById('decoy-main');
+    if (main) main.scrollTop = 0;
+  }
+
+  function initDecoyPanels() {
+    var side = document.getElementById('decoy-sidebar');
+    if (side) {
+      side.addEventListener('click', function (e) {
+        var a = e.target.closest('a.decoy-nav');
+        if (!a || a.classList.contains('decoy-hidden')) return;
+        e.preventDefault();
+        var pid = a.getAttribute('data-panel');
+        if (pid) showDecoyPanel(pid);
+      });
+    }
+    var hash = window.location.hash.slice(1);
+    if (hash && document.getElementById(hash)) showDecoyPanel(hash);
+    else showDecoyPanel('panel-html');
+
+    window.addEventListener('hashchange', function () {
+      var h = window.location.hash.slice(1);
+      if (h && document.getElementById(h)) showDecoyPanel(h);
+    });
+
+    var search = document.getElementById('decoy-search');
+    if (search) {
+      search.addEventListener('input', function () {
+        var q = search.value.trim().toLowerCase();
+        document.querySelectorAll('#decoy-sidebar a.decoy-nav').forEach(function (a) {
+          var kw = (a.getAttribute('data-keywords') || '') + ' ' + a.textContent;
+          kw = kw.toLowerCase();
+          var show = !q || kw.indexOf(q) !== -1;
+          a.classList.toggle('decoy-hidden', !show);
+        });
+      });
+    }
+
+    var themeBtn = document.getElementById('decoy-theme');
+    if (themeBtn) {
+      themeBtn.addEventListener('click', function () {
+        decoy.classList.toggle('decoy-dark');
+        try {
+          localStorage.setItem('decoy-theme', decoy.classList.contains('decoy-dark') ? 'dark' : 'light');
+        } catch (err) {}
+      });
+      try {
+        if (localStorage.getItem('decoy-theme') === 'dark') decoy.classList.add('decoy-dark');
+      } catch (err) {}
+    }
+
+    var y = document.getElementById('decoy-year');
+    if (y) y.textContent = String(new Date().getFullYear());
+
+    var runBtn = document.getElementById('decoy-html-run');
+    var ta = document.getElementById('decoy-html-try');
+    var frame = document.getElementById('decoy-html-frame');
+    if (runBtn && frame && ta) {
+      runBtn.addEventListener('click', function () {
+        try {
+          frame.srcdoc = ta.value;
+        } catch (err) {
+          frame.srcdoc = '<p>Invalid markup</p>';
+        }
+      });
+      frame.srcdoc = ta.value;
+    }
+
+    document.querySelectorAll('#decoy-footer a').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        alert('This is a static demo page. Links are placeholders.');
+      });
+    });
+
+    var crumbHome = document.querySelector('#decoy-crumb a');
+    if (crumbHome) {
+      crumbHome.addEventListener('click', function (e) {
+        e.preventDefault();
+        showDecoyPanel('panel-html');
+      });
+    }
+  }
+
+  initDecoyPanels();
 
   bindTriple(document.getElementById('decoy-topbar'), showTutorial);
   bindTriple(document.getElementById('decoy-footer'), showTutorial);
 
   bindTriple(document.getElementById('tutorial-topbar'), showDecoy);
-
-  var decoySide = document.getElementById('decoy-sidebar');
-  if (decoySide) {
-    decoySide.addEventListener('click', function (e) {
-      if (e.target.closest('a')) e.preventDefault();
-    });
-  }
 })();
 function copyCode(btn) {
   const ta = btn.closest('.file-block').querySelector('textarea');
