@@ -220,6 +220,8 @@
 #secret-guide .step-box li{margin-bottom:4px}
 #secret-guide .tip{background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:12px 16px;margin:12px 0;font-size:.85rem;color:#713f12}
 #secret-guide .folder-tree{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:16px 20px;font-family:Consolas,monospace;font-size:.82rem;line-height:1.8;white-space:pre;margin:12px 0;color:#334155}
+#secret-guide .changed-tag{display:inline-block;background:#fbbf24;color:#78350f;font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:8px;vertical-align:middle;letter-spacing:.03em}
+#secret-guide .new-tag{display:inline-block;background:#34d399;color:#064e3b;font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:8px;vertical-align:middle;letter-spacing:.03em}
 @media(max-width:900px){#secret-guide .sidebar{display:none}#secret-guide .main{margin-left:0;padding:24px 16px}}
   </style>
 </head>
@@ -274,6 +276,7 @@
 <a href="#b-products">routes/products.js</a>
 <a href="#b-orders">routes/orders.js</a>
 <a href="#b-users">routes/users.js</a>
+<a href="#b-admin">routes/admin.js</a>
 <h3>Frontend Setup</h3>
 <a href="#f-pkg">package.json</a>
 <a href="#f-html">public/index.html</a>
@@ -297,6 +300,7 @@
 <a href="#p-collection">Collection.js</a>
 <a href="#p-delivery">Delivery.js</a>
 <a href="#p-login">Login.js</a>
+<a href="#p-admin">Admin.js</a>
 </nav>
 
 <div class="main">
@@ -314,7 +318,8 @@
 Γöé   ΓööΓöÇΓöÇ routes/
 Γöé       Γö£ΓöÇΓöÇ products.js
 Γöé       Γö£ΓöÇΓöÇ orders.js
-Γöé       ΓööΓöÇΓöÇ users.js
+Γöé       Γö£ΓöÇΓöÇ users.js
+Γöé       ΓööΓöÇΓöÇ admin.js        ← NEW
 ΓööΓöÇΓöÇ frontend/
     Γö£ΓöÇΓöÇ package.json
     Γö£ΓöÇΓöÇ public/
@@ -338,7 +343,8 @@
             Γö£ΓöÇΓöÇ Rewards.js
             Γö£ΓöÇΓöÇ Collection.js
             Γö£ΓöÇΓöÇ Delivery.js
-            ΓööΓöÇΓöÇ Login.js</div>
+            Γö£ΓöÇΓöÇ Login.js
+            ΓööΓöÇΓöÇ Admin.js        ← NEW</div>
 </div>
 
 <div class="section" id="commands">
@@ -361,8 +367,8 @@
 
 <!-- ==================== BACKEND ==================== -->
 <div class="section" id="b-pkg">
-<h2>Backend: package.json</h2>
-<p>Dependencies: Express for the server, cors for cross-origin requests, sql.js for SQLite, bcryptjs for password hashing.</p>
+<h2>Backend: package.json</h2> <span class="changed-tag">CHANGED</span>
+<p>Dependencies: Express for the server, cors for cross-origin requests, sql.js for SQLite. No password hashing library needed — passwords are stored as plain text for simplicity.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">backend/package.json</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
 <textarea readonly rows="16">{
@@ -375,7 +381,6 @@
     "seed": "node seed.js"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "sql.js": "^1.10.0"
@@ -385,28 +390,33 @@
 </div>
 
 <div class="section" id="b-db">
-<h2>Backend: database.js</h2>
-<p>Sets up the SQLite database using sql.js. Creates a Statement wrapper class so we can use <code>.prepare().all()</code>, <code>.get()</code> and <code>.run()</code> methods. Also creates all 6 tables: users, products, deals, orders, order_items, and rewards.</p>
+<h2>Backend: database.js</h2> <span class="changed-tag">CHANGED</span>
+<p>Sets up the SQLite database using sql.js. Creates a Statement wrapper class so we can use <code>.prepare().all()</code>, <code>.get()</code> and <code>.run()</code> methods. Also creates all 6 tables: users, products, deals, orders, order_items, and rewards. Comments added throughout.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">backend/database.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="60">const initSqlJs = require('sql.js');
+<textarea readonly rows="65">// database.js — SQLite setup using sql.js (pure JS, no native modules needed)
+const initSqlJs = require('sql.js');
 const fs = require('fs');
 const path = require('path');
 
+// Path where the database file is stored on disk
 const DB_PATH = path.join(__dirname, 'catalog.db');
 
-let db;
+let db; // holds the sql.js Database instance
 
+// Persist the in-memory database to a file after every write
 function save() {
   const data = db.export();
   fs.writeFileSync(DB_PATH, Buffer.from(data));
 }
 
+// Wrapper class that mimics better-sqlite3's .prepare().all/get/run API
 class Statement {
   constructor(sql) {
     this.sql = sql;
   }
 
+  // Return all matching rows as an array of objects
   all(...params) {
     const stmt = db.prepare(this.sql);
     if (params.length) stmt.bind(params);
@@ -418,6 +428,7 @@ class Statement {
     return results;
   }
 
+  // Return the first matching row, or null
   get(...params) {
     const stmt = db.prepare(this.sql);
     if (params.length) stmt.bind(params);
@@ -429,11 +440,12 @@ class Statement {
     return result;
   }
 
+  // Execute an INSERT/UPDATE/DELETE and return lastInsertRowid + changes count
   run(...params) {
     db.run(this.sql, params);
     const lastId = db.exec("SELECT last_insert_rowid() as id");
     const changes = db.exec("SELECT changes() as cnt");
-    save();
+    save(); // persist after every mutation
     return {
       lastInsertRowid: lastId[0]?.values[0]?.[0] || 0,
       changes: changes[0]?.values[0]?.[0] || 0
@@ -441,6 +453,7 @@ class Statement {
   }
 }
 
+// Public wrapper object the rest of the app uses
 const dbWrapper = {
   prepare(sql) {
     return new Statement(sql);
@@ -451,14 +464,15 @@ const dbWrapper = {
   }
 };
 
+// Initialise the database: load from file or create fresh, then create tables
 async function initDatabase() {
   const SQL = await initSqlJs();
 
   if (fs.existsSync(DB_PATH)) {
     const buffer = fs.readFileSync(DB_PATH);
-    db = new SQL.Database(buffer);
+    db = new SQL.Database(buffer); // load existing db
   } else {
-    db = new SQL.Database();
+    db = new SQL.Database(); // brand new db
   }
 
   db.run(`
@@ -550,31 +564,38 @@ module.exports = { initDatabase, getDb };</textarea>
 </div>
 
 <div class="section" id="b-server">
-<h2>Backend: server.js</h2>
-<p>Main entry point. Initializes the database asynchronously, then sets up Express with CORS and JSON middleware, mounts the API routes, and starts listening on port 5000.</p>
+<h2>Backend: server.js</h2> <span class="changed-tag">CHANGED</span>
+<p>Main entry point. Initializes the database, sets up Express with CORS and JSON middleware, mounts all API routes (including the new admin routes), and starts listening on port 5000.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">backend/server.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="20">const express = require('express');
+<textarea readonly rows="25">// server.js — Express API entry point
+const express = require('express');
 const cors = require('cors');
 const { initDatabase } = require('./database');
 
 async function startServer() {
+  // Must wait for the database to be ready before loading routes
   await initDatabase();
 
+  // Import route handlers
   const productRoutes = require('./routes/products');
   const orderRoutes = require('./routes/orders');
   const userRoutes = require('./routes/users');
+  const adminRoutes = require('./routes/admin'); // NEW — admin dashboard API
 
   const app = express();
   const PORT = 5000;
 
-  app.use(cors());
-  app.use(express.json());
+  app.use(cors());          // allow cross-origin requests from React dev server
+  app.use(express.json());  // parse JSON request bodies
 
+  // Mount route groups
   app.use('/api/products', productRoutes);
   app.use('/api/orders', orderRoutes);
   app.use('/api/users', userRoutes);
+  app.use('/api/admin', adminRoutes); // NEW — admin endpoints
 
+  // Health check endpoint
   app.get('/', (req, res) => {
     res.json({ message: 'Demo API running' });
   });
@@ -589,17 +610,18 @@ startServer();</textarea>
 </div>
 
 <div class="section" id="b-seed">
-<h2>Backend: seed.js</h2>
-<p>Run with <code>node seed.js</code> to populate the database with sample products (37 items across 8 categories), deals, demo users, and order history.</p>
+<h2>Backend: seed.js</h2> <span class="changed-tag">CHANGED</span>
+<p>Run with <code>node seed.js</code> to populate the database with sample products, deals, demo users, and order history. Passwords are stored in plain text (no hashing). Collection orders use a single store name.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">backend/seed.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="60">const { initDatabase, getDb } = require('./database');
-const bcrypt = require('bcryptjs');
+<textarea readonly rows="60">// seed.js — Populate the database with sample data
+const { initDatabase, getDb } = require('./database');
 
 async function seed() {
   await initDatabase();
   const db = getDb();
 
+  // Clear all tables so we start fresh each time
   db.exec('DELETE FROM rewards');
   db.exec('DELETE FROM order_items');
   db.exec('DELETE FROM orders');
@@ -607,12 +629,12 @@ async function seed() {
   db.exec('DELETE FROM products');
   db.exec('DELETE FROM users');
 
-  const hashedPassword = bcrypt.hashSync('password123', 10);
+  // Insert demo users — plain text passwords (no hashing)
   db.prepare('INSERT INTO users (name, email, password, reward_points) VALUES (?, ?, ?, ?)').run(
-    'John Smith', 'john@email.com', hashedPassword, 250
+    'John Smith', 'john@email.com', 'password123', 250
   );
   db.prepare('INSERT INTO users (name, email, password, reward_points) VALUES (?, ?, ?, ?)').run(
-    'Jane Doe', 'jane@email.com', hashedPassword, 180
+    'Jane Doe', 'jane@email.com', 'password123', 180
   );
 
   const products = [
@@ -700,7 +722,7 @@ async function seed() {
   insertItem.run(o1.lastInsertRowid, 9, 1, 3.50);
   insertReward.run(1, 12, 'earned', `Order #${o1.lastInsertRowid}`, '2025-03-15 09:30:00');
 
-  const o2 = insertOrder.run(1, 8.75, 'collected', 'collection', null, 'Branch A ΓÇö City Centre', '14:00-16:00', '2025-04-01', '2025-04-01 13:00:00');
+  const o2 = insertOrder.run(1, 8.75, 'collected', 'collection', null, 'Main Branch', '14:00-16:00', '2025-04-01', '2025-04-01 13:00:00');
   insertItem.run(o2.lastInsertRowid, 22, 2, 1.20);
   insertItem.run(o2.lastInsertRowid, 26, 1, 1.55);
   insertItem.run(o2.lastInsertRowid, 30, 1, 2.50);
@@ -719,10 +741,12 @@ seed();</textarea>
 <p>REST API routes for products. Supports filtering by category, searching by name, fetching categories, getting active deals (with a JOIN to the products table), and fetching a single product by ID.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">backend/routes/products.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="50">const express = require('express');
+<textarea readonly rows="55">// routes/products.js — Product listing and filtering API
+const express = require('express');
 const router = express.Router();
 const { getDb } = require('../database');
 
+// GET /api/products — fetch all products (optionally filter by category or search term)
 router.get('/', (req, res) => {
   const db = getDb();
   const { category, search } = req.query;
@@ -743,6 +767,7 @@ router.get('/', (req, res) => {
   res.json(products);
 });
 
+// GET /api/products/categories — unique category list for the filter dropdown
 router.get('/categories', (req, res) => {
   const db = getDb();
   const rows = db.prepare('SELECT DISTINCT category FROM products ORDER BY category').all();
@@ -778,10 +803,12 @@ module.exports = router;</textarea>
 <p>Handles fetching a user's order history (with a JOIN to get item details) and creating new orders. When an order is placed, it calculates the total, inserts order items, and awards loyalty reward points (1 point per pound spent).</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">backend/routes/orders.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="60">const express = require('express');
+<textarea readonly rows="65">// routes/orders.js — Order history and new order placement
+const express = require('express');
 const router = express.Router();
 const { getDb } = require('../database');
 
+// GET /api/orders/:userId — fetch all orders for a user, with their items
 router.get('/:userId', (req, res) => {
   const db = getDb();
   const orders = db.prepare(
@@ -847,15 +874,17 @@ module.exports = router;</textarea>
 </div>
 
 <div class="section" id="b-users">
-<h2>Backend: routes/users.js</h2>
-<p>User authentication routes (register and login with bcrypt password hashing), plus reward points endpoints for viewing history and redeeming points.</p>
+<h2>Backend: routes/users.js</h2> <span class="changed-tag">CHANGED</span>
+<p>User authentication routes — register and login with <b>plain text passwords</b> (no hashing). Plus reward points endpoints for viewing history and redeeming points.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">backend/routes/users.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="60">const express = require('express');
+<textarea readonly rows="60">// routes/users.js — Registration, login, and reward points
+const express = require('express');
 const router = express.Router();
 const { getDb } = require('../database');
-const bcrypt = require('bcryptjs');
+// NOTE: no bcryptjs — passwords stored as plain text for simplicity
 
+// POST /api/users/register — create a new account
 router.post('/register', (req, res) => {
   const db = getDb();
   const { name, email, password } = req.body;
@@ -864,17 +893,17 @@ router.post('/register', (req, res) => {
     return res.status(400).json({ error: 'All fields are required' });
   }
 
-  const hashed = bcrypt.hashSync(password, 10);
-
   try {
+    // Check if the email is already taken
     const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
     if (existing) {
       return res.status(400).json({ error: 'Email already exists' });
     }
 
+    // Store password as plain text (no hashing)
     const result = db.prepare(
       'INSERT INTO users (name, email, password) VALUES (?, ?, ?)'
-    ).run(name, email, hashed);
+    ).run(name, email, password);
 
     const user = db.prepare(
       'SELECT id, name, email, reward_points FROM users WHERE id = ?'
@@ -886,12 +915,14 @@ router.post('/register', (req, res) => {
   }
 });
 
+// POST /api/users/login — authenticate a user
 router.post('/login', (req, res) => {
   const db = getDb();
   const { email, password } = req.body;
   const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
 
-  if (!user || !bcrypt.compareSync(password, user.password)) {
+  // Simple plain text comparison
+  if (!user || user.password !== password) {
     return res.status(401).json({ error: 'Invalid email or password' });
   }
 
@@ -931,6 +962,127 @@ router.post('/:userId/rewards/redeem', (req, res) => {
   ).run(parseInt(req.params.userId), points);
 
   res.json({ message: 'Points redeemed', remaining: user.reward_points - points });
+});
+
+module.exports = router;</textarea>
+</div>
+</div>
+
+<div class="section" id="b-admin">
+<h2>Backend: routes/admin.js</h2> <span class="new-tag">NEW</span>
+<p>Admin API routes for managing products and orders. Supports adding new products, editing existing ones, deleting products, listing all orders, and updating order status.</p>
+<div class="file-block">
+<div class="file-header"><span class="file-path">backend/routes/admin.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<textarea readonly rows="80">// routes/admin.js — Admin dashboard API (products CRUD + order management)
+const express = require('express');
+const router = express.Router();
+const { getDb } = require('../database');
+
+// ============ PRODUCT MANAGEMENT ============
+
+// GET /api/admin/products — list all products for the admin table
+router.get('/products', (req, res) => {
+  const db = getDb();
+  const products = db.prepare('SELECT * FROM products ORDER BY id DESC').all();
+  res.json(products);
+});
+
+// POST /api/admin/products — add a new product
+router.post('/products', (req, res) => {
+  const db = getDb();
+  const { name, price, category, image_url, description, stock } = req.body;
+
+  // Validate required fields
+  if (!name || !price || !category) {
+    return res.status(400).json({ error: 'Name, price and category are required' });
+  }
+
+  const result = db.prepare(
+    'INSERT INTO products (name, price, category, image_url, description, stock) VALUES (?, ?, ?, ?, ?, ?)'
+  ).run(name, price, category, image_url || '', description || '', stock || 100);
+
+  // Return the newly created product
+  const product = db.prepare('SELECT * FROM products WHERE id = ?').get(result.lastInsertRowid);
+  res.status(201).json(product);
+});
+
+// PUT /api/admin/products/:id — edit an existing product
+router.put('/products/:id', (req, res) => {
+  const db = getDb();
+  const { name, price, category, image_url, description, stock } = req.body;
+  const id = parseInt(req.params.id);
+
+  // Check the product exists first
+  const existing = db.prepare('SELECT * FROM products WHERE id = ?').get(id);
+  if (!existing) {
+    return res.status(404).json({ error: 'Product not found' });
+  }
+
+  db.prepare(
+    'UPDATE products SET name=?, price=?, category=?, image_url=?, description=?, stock=? WHERE id=?'
+  ).run(
+    name || existing.name,
+    price || existing.price,
+    category || existing.category,
+    image_url !== undefined ? image_url : existing.image_url,
+    description !== undefined ? description : existing.description,
+    stock !== undefined ? stock : existing.stock,
+    id
+  );
+
+  const updated = db.prepare('SELECT * FROM products WHERE id = ?').get(id);
+  res.json(updated);
+});
+
+// DELETE /api/admin/products/:id — remove a product
+router.delete('/products/:id', (req, res) => {
+  const db = getDb();
+  const id = parseInt(req.params.id);
+
+  const existing = db.prepare('SELECT * FROM products WHERE id = ?').get(id);
+  if (!existing) {
+    return res.status(404).json({ error: 'Product not found' });
+  }
+
+  // Also clean up any deals linked to this product
+  db.prepare('DELETE FROM deals WHERE product_id = ?').run(id);
+  db.prepare('DELETE FROM products WHERE id = ?').run(id);
+
+  res.json({ message: 'Product deleted' });
+});
+
+// ============ ORDER MANAGEMENT ============
+
+// GET /api/admin/orders — list all orders with their items
+router.get('/orders', (req, res) => {
+  const db = getDb();
+  const orders = db.prepare(
+    'SELECT o.*, u.name AS user_name, u.email AS user_email FROM orders o JOIN users u ON o.user_id = u.id ORDER BY o.created_at DESC'
+  ).all();
+
+  // Attach items to each order
+  orders.forEach(order => {
+    order.items = db.prepare(
+      'SELECT oi.*, p.name AS product_name FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = ?'
+    ).all(order.id);
+  });
+
+  res.json(orders);
+});
+
+// PUT /api/admin/orders/:id/status — update order status (e.g. confirmed → dispatched → delivered)
+router.put('/orders/:id/status', (req, res) => {
+  const db = getDb();
+  const { status } = req.body;
+  const id = parseInt(req.params.id);
+
+  const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(id);
+  if (!order) {
+    return res.status(404).json({ error: 'Order not found' });
+  }
+
+  db.prepare('UPDATE orders SET status = ? WHERE id = ?').run(status, id);
+  res.json({ message: 'Status updated', id, status });
 });
 
 module.exports = router;</textarea>
@@ -990,7 +1142,8 @@ module.exports = router;</textarea>
 <p>Entry point. Wraps the App in BrowserRouter (for routing), UserProvider and CartProvider (for global state).</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/src/index.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="20">import React from 'react';
+<textarea readonly rows="22">// index.js — React app entry point
+import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
@@ -998,6 +1151,7 @@ import { CartProvider } from './context/CartContext';
 import { UserProvider } from './context/UserContext';
 import './index.css';
 
+// Mount the app into the root div, wrapped in providers for routing and state
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
@@ -1051,11 +1205,12 @@ input, select, textarea {
 
 <!-- ==================== FRONTEND CORE ==================== -->
 <div class="section" id="f-app">
-<h2>Frontend: src/App.js</h2>
-<p>Root component. Renders the Navbar, defines all Routes using React Router, and includes a footer.</p>
+<h2>Frontend: src/App.js</h2> <span class="changed-tag">CHANGED</span>
+<p>Root component. Renders the Navbar, defines all Routes using React Router (including the new Admin route), and includes a footer.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/src/App.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="52">import { Routes, Route } from 'react-router-dom';
+<textarea readonly rows="56">// App.js — Root component with routing
+import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Products from './pages/Products';
@@ -1065,6 +1220,7 @@ import Rewards from './pages/Rewards';
 import Collection from './pages/Collection';
 import Delivery from './pages/Delivery';
 import Login from './pages/Login';
+import Admin from './pages/Admin'; // NEW — admin dashboard page
 import './App.css';
 
 function App() {
@@ -1081,6 +1237,7 @@ function App() {
           <Route path="/collection" element={<Collection />} />
           <Route path="/delivery" element={<Delivery />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/admin" element={<Admin />} /> {/* NEW */}
         </Routes>
       </main>
       <footer className="footer">
@@ -2059,13 +2216,15 @@ export default App;</textarea>
 <p>React Context for the checkout basket. Provides addToCart, removeFromCart, updateQuantity, clearCart, plus computed cartTotal and cartCount values to all components.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/src/context/CartContext.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="56">import { createContext, useContext, useState } from 'react';
+<textarea readonly rows="60">// CartContext.js — Global shopping basket state using React Context
+import { createContext, useContext, useState } from 'react';
 
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setCartItems] = useState([]); // array of {product, quantity}
 
+  // Add a product or increment its quantity if already in basket
   const addToCart = (product) => {
     setCartItems(prev => {
       const existing = prev.find(item => item.id === product.id);
@@ -2124,11 +2283,13 @@ export const useCart = () => useContext(CartContext);</textarea>
 <p>React Context for the logged-in user. Persists user data to localStorage so the session survives page refreshes.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/src/context/UserContext.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="29">import { createContext, useContext, useState, useEffect } from 'react';
+<textarea readonly rows="32">// UserContext.js — Global auth state, persisted in localStorage
+import { createContext, useContext, useState, useEffect } from 'react';
 
 const UserContext = createContext();
 
 export function UserProvider({ children }) {
+  // Try to restore session from localStorage on first render
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('catalogdemo_session');
     return saved ? JSON.parse(saved) : null;
@@ -2158,11 +2319,12 @@ export const useUser = () => useContext(UserContext);</textarea>
 
 <!-- ==================== COMPONENTS ==================== -->
 <div class="section" id="f-navbar">
-<h2>Component: Navbar.js</h2>
-<p>Navigation bar with logo, page links, basket button with item count badge, and login/logout. Includes a slide-out panel with quantity controls and checkout links for delivery or collection.</p>
+<h2>Component: Navbar.js</h2> <span class="changed-tag">CHANGED</span>
+<p>Navigation bar with logo, page links (including Admin link), basket button with item count badge, and login/logout. Includes a slide-out panel with quantity controls and checkout links for delivery or collection.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/src/components/Navbar.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="60">import { useState } from 'react';
+<textarea readonly rows="65">// Navbar.js — Top navigation bar with links, basket panel, and auth
+import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useUser } from '../context/UserContext';
@@ -2174,6 +2336,7 @@ function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Helper to highlight the active page link
   const isActive = (path) => location.pathname === path ? 'active' : '';
 
   return (
@@ -2190,6 +2353,7 @@ function Navbar() {
             <Link to="/deals" className={isActive('/deals')}>Deals</Link>
             {user && <Link to="/order-history" className={isActive('/order-history')}>Orders</Link>}
             {user && <Link to="/rewards" className={isActive('/rewards')}>Rewards</Link>}
+            <Link to="/admin" className={isActive('/admin')}>Admin</Link> {/* NEW */}
           </div>
 
           <div className="navbar-right">
@@ -2284,7 +2448,8 @@ export default Navbar;</textarea>
 <p>Reusable product card used on the Home, Products, and Deals pages. Shows the image (emoji), name, description, price (with deal price if applicable), and an add button with a brief confirmation state.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/src/components/ProductCard.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="47">import { useState } from 'react';
+<textarea readonly rows="50">// ProductCard.js — Reusable card showing product info and add-to-basket button
+import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 
 function ProductCard({ product, deal }) {
@@ -2340,7 +2505,8 @@ export default ProductCard;</textarea>
 <p>Landing page with a hero banner, category grid linking to filtered listings, a preview of current promotions, and featured items from the first category (Electronics).</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/src/pages/Home.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="60">import { useState, useEffect } from 'react';
+<textarea readonly rows="62">// Home.js — Landing page with hero banner, category grid, and featured products
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 
@@ -2446,7 +2612,8 @@ export default Home;</textarea>
 <p>Browse all products with a sidebar category filter and search bar. Uses useSearchParams to read/write the category from the URL query string. Fetches deals to show discount badges on matching products.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/src/pages/Products.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="60">import { useState, useEffect } from 'react';
+<textarea readonly rows="62">// Products.js — Product listing with category filter and search
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 
@@ -2564,7 +2731,8 @@ export default Products;</textarea>
 <p>Shows all active deals with a red banner and product cards displaying discount percentages and original/deal prices.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/src/pages/Deals.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="56">import { useState, useEffect } from 'react';
+<textarea readonly rows="58">// Deals.js — Displays all active deals with discount badges
+import { useState, useEffect } from 'react';
 import ProductCard from '../components/ProductCard';
 
 const API = 'http://localhost:5000/api';
@@ -2628,7 +2796,8 @@ export default Deals;</textarea>
 <p>Displays the logged-in user's past orders. Each order card shows the order number, date, status badge, item list, delivery/collection info, and total. Requires authentication.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/src/pages/OrderHistory.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="60">import { useState, useEffect } from 'react';
+<textarea readonly rows="62">// OrderHistory.js — Displays the logged-in user's past orders
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 
@@ -2725,7 +2894,8 @@ export default OrderHistory;</textarea>
 <p>Shows the user's loyalty points balance, points value in pounds, a redeem button (when 100+ points), and a full history of earned/redeemed points.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/src/pages/Rewards.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="60">import { useState, useEffect } from 'react';
+<textarea readonly rows="62">// Rewards.js — View loyalty points balance, history, and redeem
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 
@@ -2839,25 +3009,20 @@ export default Rewards;</textarea>
 </div>
 
 <div class="section" id="p-collection">
-<h2>Page: Collection.js</h2>
-<p>Pickup checkout page. User selects a branch from a dropdown, picks a date and time slot, reviews the order summary, and submits. Success screen shows confirmation and loyalty points.</p>
+<h2>Page: Collection.js</h2> <span class="changed-tag">CHANGED</span>
+<p>Pickup checkout page. Uses a single branch (no dropdown — just one store). User picks a date and time slot, reviews the order summary, and submits. Success screen shows confirmation and loyalty points.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/src/pages/Collection.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="60">import { useState } from 'react';
+<textarea readonly rows="55">// Collection.js — Store pickup checkout page (single branch)
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useUser } from '../context/UserContext';
 
 const API = 'http://localhost:5000/api';
 
-const stores = [
-  'Branch A ΓÇö City Centre',
-  'Branch B ΓÇö Riverside',
-  'Branch C ΓÇö Tech Park',
-  'Branch D ΓÇö Mall',
-  'Branch E ΓÇö North',
-  'Branch F ΓÇö South'
-];
+// Only one store — no dropdown needed
+const STORE_NAME = 'Main Branch';
 
 const timeSlots = [
   '08:00 - 10:00',
@@ -2873,7 +3038,7 @@ function Collection() {
   const { user } = useUser();
   const navigate = useNavigate();
 
-  const [store, setStore] = useState('');
+  // No store dropdown — always use the single branch
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [success, setSuccess] = useState(false);
@@ -2893,7 +3058,7 @@ function Collection() {
           price: item.price
         })),
         order_type: 'collection',
-        store_location: store,
+        store_location: STORE_NAME, // always use the single branch
         slot_date: date,
         slot_time: time
       })
@@ -2937,7 +3102,7 @@ function Collection() {
         <p>Order #{orderDetails.id} - Total: ┬ú{orderDetails.total.toFixed(2)}</p>
         <p>You earned <strong>{orderDetails.points_earned} reward points</strong>!</p>
         <p style={{ marginTop: 8, color: '#666' }}>
-          ≡ƒÅ¬ Collect from: {store}<br />
+          ≡ƒÅ¬ Collect from: {STORE_NAME}<br />
           ≡ƒôà {date} at {time}
         </p>
         <div style={{ marginTop: 24, display: 'flex', gap: 12, justifyContent: 'center' }}>
@@ -2962,14 +3127,10 @@ function Collection() {
         <form className="checkout-form" onSubmit={handleSubmit}>
           <h2>Collection Details</h2>
 
+          {/* Single store — just display it, no dropdown */}
           <div className="form-group">
-            <label>Select branch</label>
-            <select value={store} onChange={e => setStore(e.target.value)} required>
-              <option value="">Choose a branch...</option>
-              {stores.map(s => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
+            <label>Branch</label>
+            <input type="text" value={STORE_NAME} disabled style={{ background: '#f0f0f0' }} />
           </div>
 
           <div className="form-group">
@@ -2996,7 +3157,7 @@ function Collection() {
           <button
             type="submit"
             className="place-order-btn"
-            disabled={!store || !date || !time}
+            disabled={!date || !time}
           >
             Place Collection Order - ┬ú{cartTotal.toFixed(2)}
           </button>
@@ -3029,7 +3190,8 @@ export default Collection;</textarea>
 <p>Home delivery checkout page. User enters their address, postcode, selects a date and time slot. Includes a delivery fee (┬ú3.99, free over ┬ú40). Order summary with running total. Success screen on completion.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/src/pages/Delivery.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="60">import { useState } from 'react';
+<textarea readonly rows="62">// Delivery.js — Home delivery checkout page with address + time slot
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useUser } from '../context/UserContext';
@@ -3231,7 +3393,8 @@ export default Delivery;</textarea>
 <p>Combined login and registration page. Toggles between login and register forms. Sends credentials to the backend API and stores the returned user data in UserContext on success.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/src/pages/Login.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="60">import { useState } from 'react';
+<textarea readonly rows="65">// Login.js — Combined login and registration page
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 
@@ -3241,6 +3404,7 @@ function Login() {
   const { login } = useUser();
   const navigate = useNavigate();
 
+  // Toggle between login and register modes
   const [isRegister, setIsRegister] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -3337,6 +3501,244 @@ function Login() {
 }
 
 export default Login;</textarea>
+</div>
+</div>
+
+<div class="section" id="p-admin">
+<h2>Page: Admin.js</h2> <span class="new-tag">NEW</span>
+<p>Admin dashboard page. Two tabs: <b>Products</b> (add, edit, delete) and <b>Orders</b> (view all orders, update status). Products are managed via a form and an editable table. Orders display with status dropdown.</p>
+<div class="file-block">
+<div class="file-header"><span class="file-path">frontend/src/pages/Admin.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+<textarea readonly rows="120">// Admin.js — Admin dashboard for managing products and orders
+import { useState, useEffect } from 'react';
+
+const API = 'http://localhost:5000/api';
+
+function Admin() {
+  // Tab state: 'products' or 'orders'
+  const [tab, setTab] = useState('products');
+
+  // ============ PRODUCT STATE ============
+  const [products, setProducts] = useState([]);
+  const [editId, setEditId] = useState(null); // null = adding new, number = editing
+  const [form, setForm] = useState({
+    name: '', price: '', category: '', image_url: '', description: '', stock: 100
+  });
+
+  // ============ ORDER STATE ============
+  const [orders, setOrders] = useState([]);
+
+  // Fetch products from the admin API
+  const loadProducts = () => {
+    fetch(`${API}/admin/products`)
+      .then(r => r.json())
+      .then(setProducts)
+      .catch(console.error);
+  };
+
+  // Fetch orders from the admin API
+  const loadOrders = () => {
+    fetch(`${API}/admin/orders`)
+      .then(r => r.json())
+      .then(setOrders)
+      .catch(console.error);
+  };
+
+  // Load data when the component mounts
+  useEffect(() => {
+    loadProducts();
+    loadOrders();
+  }, []);
+
+  // Reset the form fields
+  const resetForm = () => {
+    setForm({ name: '', price: '', category: '', image_url: '', description: '', stock: 100 });
+    setEditId(null);
+  };
+
+  // Handle add or edit product submit
+  const handleProductSubmit = async (e) => {
+    e.preventDefault();
+
+    const body = {
+      ...form,
+      price: parseFloat(form.price),
+      stock: parseInt(form.stock)
+    };
+
+    if (editId) {
+      // Editing an existing product
+      await fetch(`${API}/admin/products/${editId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+    } else {
+      // Adding a new product
+      await fetch(`${API}/admin/products`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+    }
+
+    resetForm();
+    loadProducts(); // refresh the list
+  };
+
+  // Populate the form for editing
+  const startEdit = (p) => {
+    setEditId(p.id);
+    setForm({
+      name: p.name,
+      price: p.price,
+      category: p.category,
+      image_url: p.image_url || '',
+      description: p.description || '',
+      stock: p.stock
+    });
+  };
+
+  // Delete a product
+  const deleteProduct = async (id) => {
+    if (!window.confirm('Delete this product?')) return;
+    await fetch(`${API}/admin/products/${id}`, { method: 'DELETE' });
+    loadProducts();
+  };
+
+  // Update order status
+  const updateStatus = async (id, status) => {
+    await fetch(`${API}/admin/orders/${id}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    });
+    loadOrders();
+  };
+
+  return (
+    &lt;div&gt;
+      &lt;h1 style={{ marginBottom: 16 }}&gt;Admin Dashboard&lt;/h1&gt;
+
+      {/* Tab buttons */}
+      &lt;div style={{ display: 'flex', gap: 8, marginBottom: 24 }}&gt;
+        &lt;button
+          className={`hero-btn${tab === 'products' ? '' : ' outline'}`}
+          onClick={() =&gt; setTab('products')}
+          style={{ padding: '10px 20px' }}
+        &gt;
+          Products
+        &lt;/button&gt;
+        &lt;button
+          className={`hero-btn${tab === 'orders' ? '' : ' outline'}`}
+          onClick={() =&gt; setTab('orders')}
+          style={{ padding: '10px 20px' }}
+        &gt;
+          Orders
+        &lt;/button&gt;
+      &lt;/div&gt;
+
+      {/* ============ PRODUCTS TAB ============ */}
+      {tab === 'products' &amp;&amp; (
+        &lt;div&gt;
+          &lt;h2&gt;{editId ? 'Edit Product' : 'Add Product'}&lt;/h2&gt;
+          &lt;form onSubmit={handleProductSubmit} style={{ display: 'grid', gap: 10, maxWidth: 500, marginBottom: 24 }}&gt;
+            &lt;input placeholder="Name" value={form.name} onChange={e =&gt; setForm({...form, name: e.target.value})} required /&gt;
+            &lt;input placeholder="Price" type="number" step="0.01" value={form.price} onChange={e =&gt; setForm({...form, price: e.target.value})} required /&gt;
+            &lt;input placeholder="Category" value={form.category} onChange={e =&gt; setForm({...form, category: e.target.value})} required /&gt;
+            &lt;input placeholder="Emoji / Image URL" value={form.image_url} onChange={e =&gt; setForm({...form, image_url: e.target.value})} /&gt;
+            &lt;input placeholder="Description" value={form.description} onChange={e =&gt; setForm({...form, description: e.target.value})} /&gt;
+            &lt;input placeholder="Stock" type="number" value={form.stock} onChange={e =&gt; setForm({...form, stock: e.target.value})} /&gt;
+            &lt;div style={{ display: 'flex', gap: 8 }}&gt;
+              &lt;button type="submit" className="hero-btn" style={{ padding: '10px 20px' }}&gt;
+                {editId ? 'Save Changes' : 'Add Product'}
+              &lt;/button&gt;
+              {editId &amp;&amp; (
+                &lt;button type="button" className="hero-btn" style={{ padding: '10px 20px', background: '#999' }} onClick={resetForm}&gt;
+                  Cancel
+                &lt;/button&gt;
+              )}
+            &lt;/div&gt;
+          &lt;/form&gt;
+
+          &lt;h2&gt;All Products ({products.length})&lt;/h2&gt;
+          &lt;table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}&gt;
+            &lt;thead&gt;
+              &lt;tr style={{ background: '#f1f5f9', textAlign: 'left' }}&gt;
+                &lt;th style={{ padding: 8 }}&gt;ID&lt;/th&gt;
+                &lt;th style={{ padding: 8 }}&gt;Name&lt;/th&gt;
+                &lt;th style={{ padding: 8 }}&gt;Price&lt;/th&gt;
+                &lt;th style={{ padding: 8 }}&gt;Category&lt;/th&gt;
+                &lt;th style={{ padding: 8 }}&gt;Stock&lt;/th&gt;
+                &lt;th style={{ padding: 8 }}&gt;Actions&lt;/th&gt;
+              &lt;/tr&gt;
+            &lt;/thead&gt;
+            &lt;tbody&gt;
+              {products.map(p =&gt; (
+                &lt;tr key={p.id} style={{ borderBottom: '1px solid #e2e8f0' }}&gt;
+                  &lt;td style={{ padding: 8 }}&gt;{p.id}&lt;/td&gt;
+                  &lt;td style={{ padding: 8 }}&gt;{p.image_url} {p.name}&lt;/td&gt;
+                  &lt;td style={{ padding: 8 }}&gt;&amp;pound;{p.price.toFixed(2)}&lt;/td&gt;
+                  &lt;td style={{ padding: 8 }}&gt;{p.category}&lt;/td&gt;
+                  &lt;td style={{ padding: 8 }}&gt;{p.stock}&lt;/td&gt;
+                  &lt;td style={{ padding: 8 }}&gt;
+                    &lt;button onClick={() =&gt; startEdit(p)} style={{ marginRight: 6, cursor: 'pointer' }}&gt;Edit&lt;/button&gt;
+                    &lt;button onClick={() =&gt; deleteProduct(p.id)} style={{ color: 'red', cursor: 'pointer' }}&gt;Delete&lt;/button&gt;
+                  &lt;/td&gt;
+                &lt;/tr&gt;
+              ))}
+            &lt;/tbody&gt;
+          &lt;/table&gt;
+        &lt;/div&gt;
+      )}
+
+      {/* ============ ORDERS TAB ============ */}
+      {tab === 'orders' &amp;&amp; (
+        &lt;div&gt;
+          &lt;h2&gt;All Orders ({orders.length})&lt;/h2&gt;
+          {orders.length === 0 &amp;&amp; &lt;p&gt;No orders yet.&lt;/p&gt;}
+          {orders.map(order =&gt; (
+            &lt;div key={order.id} style={{
+              border: '1px solid #e2e8f0', borderRadius: 8, padding: 16, marginBottom: 16
+            }}&gt;
+              &lt;div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}&gt;
+                &lt;div&gt;
+                  &lt;strong&gt;Order #{order.id}&lt;/strong&gt; — {order.user_name} ({order.user_email})
+                  &lt;br /&gt;
+                  &lt;small&gt;Type: {order.order_type} | Date: {order.created_at}&lt;/small&gt;
+                  &lt;br /&gt;
+                  &lt;small&gt;Total: &amp;pound;{order.total.toFixed(2)}&lt;/small&gt;
+                &lt;/div&gt;
+                &lt;div&gt;
+                  &lt;label&gt;Status: &lt;/label&gt;
+                  &lt;select
+                    value={order.status}
+                    onChange={e =&gt; updateStatus(order.id, e.target.value)}
+                  &gt;
+                    &lt;option value="confirmed"&gt;Confirmed&lt;/option&gt;
+                    &lt;option value="dispatched"&gt;Dispatched&lt;/option&gt;
+                    &lt;option value="delivered"&gt;Delivered&lt;/option&gt;
+                    &lt;option value="collected"&gt;Collected&lt;/option&gt;
+                    &lt;option value="cancelled"&gt;Cancelled&lt;/option&gt;
+                  &lt;/select&gt;
+                &lt;/div&gt;
+              &lt;/div&gt;
+              {order.items &amp;&amp; order.items.length &gt; 0 &amp;&amp; (
+                &lt;ul style={{ marginTop: 8, paddingLeft: 20, fontSize: '0.85rem' }}&gt;
+                  {order.items.map((item, i) =&gt; (
+                    &lt;li key={i}&gt;{item.product_name} x{item.quantity} — &amp;pound;{(item.price * item.quantity).toFixed(2)}&lt;/li&gt;
+                  ))}
+                &lt;/ul&gt;
+              )}
+            &lt;/div&gt;
+          ))}
+        &lt;/div&gt;
+      )}
+    &lt;/div&gt;
+  );
+}
+
+export default Admin;</textarea>
 </div>
 </div>
 
