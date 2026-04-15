@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import ProductThumb from '../components/ProductThumb';
 
 const API = 'http://localhost:5000/api';
 
@@ -7,6 +8,8 @@ function Admin() {
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [editingId, setEditingId] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef(null);
   const [form, setForm] = useState({
     name: '',
     price: '',
@@ -33,7 +36,23 @@ function Admin() {
 
   const resetForm = () => {
     setEditingId(null);
+    if (fileRef.current) fileRef.current.value = '';
     setForm({ name: '', price: '', category: '', image_url: '', description: '', stock: '100' });
+  };
+
+  const onPickFile = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    const fd = new FormData();
+    fd.append('image', file);
+    fetch(`${API}/admin/upload`, { method: 'POST', body: fd })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.url) setForm((f) => ({ ...f, image_url: data.url }));
+      })
+      .catch(() => {})
+      .finally(() => setUploading(false));
   };
 
   const submitProduct = (e) => {
@@ -60,6 +79,7 @@ function Admin() {
 
   const startEdit = (p) => {
     setEditingId(p.id);
+    if (fileRef.current) fileRef.current.value = '';
     setForm({
       name: p.name,
       price: String(p.price),
@@ -87,7 +107,7 @@ function Admin() {
     <div>
       <h1>Admin</h1>
       <p style={{ color: '#666', marginBottom: 16 }}>
-        Add your products here first — the shop starts empty until you do.
+        Add products here — upload a photo or type an emoji. Set stock so you know how many you have.
       </p>
       <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
         <button
@@ -117,7 +137,7 @@ function Admin() {
               <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
             </div>
             <div className="form-group">
-              <label>Price</label>
+              <label>Price (£)</label>
               <input type="number" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
             </div>
             <div className="form-group">
@@ -125,16 +145,39 @@ function Admin() {
               <input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} required />
             </div>
             <div className="form-group">
-              <label>Image (emoji or text)</label>
-              <input value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} />
+              <label>Photo</label>
+              <input ref={fileRef} type="file" accept="image/*" onChange={onPickFile} />
+              {uploading && <span style={{ marginLeft: 8, color: '#666' }}>Uploading…</span>}
+              <p style={{ fontSize: '0.85rem', color: '#888', marginTop: 4 }}>
+                Or put an emoji in the box below instead of a file.
+              </p>
             </div>
+            <div className="form-group">
+              <label>Image (URL path or emoji)</label>
+              <input
+                value={form.image_url}
+                onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+                placeholder="/uploads/... or e.g. 🍎"
+              />
+            </div>
+            {form.image_url && (
+              <div style={{ marginBottom: 12 }}>
+                <ProductThumb imageUrl={form.image_url} size={56} />
+              </div>
+            )}
             <div className="form-group">
               <label>Description</label>
               <input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
             </div>
             <div className="form-group">
-              <label>Stock</label>
-              <input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} />
+              <label>Stock (how many in stock)</label>
+              <input
+                type="number"
+                min="0"
+                value={form.stock}
+                onChange={(e) => setForm({ ...form, stock: e.target.value })}
+                required
+              />
             </div>
             <button type="submit" className="place-order-btn">{editingId ? 'Save' : 'Add'}</button>
             {editingId && (
@@ -148,8 +191,10 @@ function Admin() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
             <thead>
               <tr style={{ textAlign: 'left', borderBottom: '1px solid #ddd' }}>
+                <th style={{ padding: 8 }}></th>
                 <th style={{ padding: 8 }}>Name</th>
                 <th style={{ padding: 8 }}>£</th>
+                <th style={{ padding: 8 }}>Stock</th>
                 <th style={{ padding: 8 }}>Category</th>
                 <th style={{ padding: 8 }}></th>
               </tr>
@@ -157,8 +202,12 @@ function Admin() {
             <tbody>
               {products.map((p) => (
                 <tr key={p.id} style={{ borderBottom: '1px solid #eee' }}>
-                  <td style={{ padding: 8 }}>{p.image_url} {p.name}</td>
+                  <td style={{ padding: 8, width: 52 }}>
+                    <ProductThumb imageUrl={p.image_url} size={40} />
+                  </td>
+                  <td style={{ padding: 8 }}>{p.name}</td>
                   <td style={{ padding: 8 }}>{Number(p.price).toFixed(2)}</td>
+                  <td style={{ padding: 8 }}>{p.stock}</td>
                   <td style={{ padding: 8 }}>{p.category}</td>
                   <td style={{ padding: 8 }}>
                     <button type="button" onClick={() => startEdit(p)}>Edit</button>

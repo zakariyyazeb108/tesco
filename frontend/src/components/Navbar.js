@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useUser } from '../context/UserContext';
+import ProductThumb from './ProductThumb';
 
 function Navbar() {
   const [cartOpen, setCartOpen] = useState(false);
@@ -65,7 +66,7 @@ function Navbar() {
               ) : (
                 cartItems.map(item => (
                   <div key={item.id} className="cart-item">
-                    <div className="cart-item-emoji">{item.image_url}</div>
+                    <div className="cart-item-emoji"><ProductThumb imageUrl={item.image_url} size={44} /></div>
                     <div className="cart-item-info">
                       <h4>{item.name}</h4>
                       <p>£{(item.price * item.quantity).toFixed(2)}</p>
