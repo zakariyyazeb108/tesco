@@ -310,41 +310,41 @@
 <h2>Project Structure</h2>
 <p>The application is split into two folders: a Node.js backend API and a React frontend.</p>
 <div class="folder-tree">project/
-Γö£ΓöÇΓöÇ backend/
-Γöé   Γö£ΓöÇΓöÇ package.json
-Γöé   Γö£ΓöÇΓöÇ database.js
-Γöé   Γö£ΓöÇΓöÇ server.js
-Γöé   Γö£ΓöÇΓöÇ seed.js
-Γöé   ΓööΓöÇΓöÇ routes/
-Γöé       Γö£ΓöÇΓöÇ products.js
-Γöé       Γö£ΓöÇΓöÇ orders.js
-Γöé       Γö£ΓöÇΓöÇ users.js
-Γöé       ΓööΓöÇΓöÇ admin.js        ← NEW
-ΓööΓöÇΓöÇ frontend/
-    Γö£ΓöÇΓöÇ package.json
-    Γö£ΓöÇΓöÇ public/
-    Γöé   ΓööΓöÇΓöÇ index.html
-    ΓööΓöÇΓöÇ src/
-        Γö£ΓöÇΓöÇ index.js
-        Γö£ΓöÇΓöÇ index.css
-        Γö£ΓöÇΓöÇ App.js
-        Γö£ΓöÇΓöÇ App.css
-        Γö£ΓöÇΓöÇ context/
-        Γöé   Γö£ΓöÇΓöÇ CartContext.js
-        Γöé   ΓööΓöÇΓöÇ UserContext.js
-        Γö£ΓöÇΓöÇ components/
-        Γöé   Γö£ΓöÇΓöÇ Navbar.js
-        Γöé   ΓööΓöÇΓöÇ ProductCard.js
-        ΓööΓöÇΓöÇ pages/
-            Γö£ΓöÇΓöÇ Home.js
-            Γö£ΓöÇΓöÇ Products.js
-            Γö£ΓöÇΓöÇ Deals.js
-            Γö£ΓöÇΓöÇ OrderHistory.js
-            Γö£ΓöÇΓöÇ Rewards.js
-            Γö£ΓöÇΓöÇ Collection.js
-            Γö£ΓöÇΓöÇ Delivery.js
-            Γö£ΓöÇΓöÇ Login.js
-            ΓööΓöÇΓöÇ Admin.js        ← NEW</div>
+|-- backend/
+|   |-- package.json
+|   |-- database.js
+|   |-- server.js
+|   |-- seed.js
+|   +-- routes/
+|       |-- products.js
+|       |-- orders.js
+|       |-- users.js
+|       +-- admin.js          &lt;-- NEW
++-- frontend/
+    |-- package.json
+    |-- public/
+    |   +-- index.html
+    +-- src/
+        |-- index.js
+        |-- index.css
+        |-- App.js
+        |-- App.css
+        |-- context/
+        |   |-- CartContext.js
+        |   +-- UserContext.js
+        |-- components/
+        |   |-- Navbar.js
+        |   +-- ProductCard.js
+        +-- pages/
+            |-- Home.js
+            |-- Products.js
+            |-- Deals.js
+            |-- OrderHistory.js
+            |-- Rewards.js
+            |-- Collection.js
+            |-- Delivery.js
+            |-- Login.js
+            +-- Admin.js          &lt;-- NEW</div>
 </div>
 
 <div class="section" id="commands">
@@ -638,50 +638,50 @@ async function seed() {
   );
 
   const products = [
-    ['LED Desk Lamp', 2.00, 'Electronics', '≡ƒÆí', 'Adjustable brightness desk lamp'],
-    ['Wireless Mouse', 0.75, 'Electronics', '≡ƒû▒∩╕Å', 'Compact optical mouse'],
-    ['USB-C Cable 2m', 0.55, 'Electronics', '≡ƒöî', 'Braided charging cable'],
-    ['HD Webcam', 0.69, 'Electronics', '≡ƒô╖', '720p plug-and-play webcam'],
-    ['Bluetooth Speaker Mini', 2.25, 'Electronics', '≡ƒöè', 'Portable rechargeable speaker'],
-    ['Monitor Stand', 2.50, 'Electronics', '≡ƒûÑ∩╕Å', 'Aluminium riser for monitors'],
-    ['Mechanical Keyboard', 1.80, 'Electronics', 'Γî¿∩╕Å', 'Tactile switches, UK layout'],
-    ['Laptop Sleeve 15"', 0.65, 'Electronics', '≡ƒÆ╝', 'Padded protective sleeve'],
+    ['LED Desk Lamp', 2.00, 'Electronics', 'LAMP', 'Adjustable brightness desk lamp'],
+    ['Wireless Mouse', 0.75, 'Electronics', 'MOUSE', 'Compact optical mouse'],
+    ['USB-C Cable 2m', 0.55, 'Electronics', 'CABLE', 'Braided charging cable'],
+    ['HD Webcam', 0.69, 'Electronics', 'CAM', '720p plug-and-play webcam'],
+    ['Bluetooth Speaker Mini', 2.25, 'Electronics', 'SPKR', 'Portable rechargeable speaker'],
+    ['Monitor Stand', 2.50, 'Electronics', 'STAND', 'Aluminium riser for monitors'],
+    ['Mechanical Keyboard', 1.80, 'Electronics', 'KB', 'Tactile switches, UK layout'],
+    ['Laptop Sleeve 15"', 0.65, 'Electronics', 'SLEEVE', 'Padded protective sleeve'],
 
-    ['USB-C Hub 7-in-1', 3.50, 'Peripherals', '≡ƒöº', 'HDMI, USB-A, SD, power pass-through'],
-    ['HDMI Cable 2m', 3.25, 'Peripherals', '≡ƒô║', 'High-speed 4K capable'],
-    ['External SSD 500GB', 4.00, 'Peripherals', '≡ƒÆ╛', 'USB 3.2 portable drive'],
-    ['Docking Station', 2.75, 'Peripherals', '≡ƒöù', 'Laptop dock with display outputs'],
-    ['Card Reader USB-C', 4.50, 'Peripherals', '≡ƒùé∩╕Å', 'SD and microSD slots'],
+    ['USB-C Hub 7-in-1', 3.50, 'Peripherals', 'HUB', 'HDMI, USB-A, SD, power pass-through'],
+    ['HDMI Cable 2m', 3.25, 'Peripherals', 'HDMI', 'High-speed 4K capable'],
+    ['External SSD 500GB', 4.00, 'Peripherals', 'SSD', 'USB 3.2 portable drive'],
+    ['Docking Station', 2.75, 'Peripherals', 'DOCK', 'Laptop dock with display outputs'],
+    ['Card Reader USB-C', 4.50, 'Peripherals', 'READER', 'SD and microSD slots'],
 
-    ['Desk Organizer Set', 1.45, 'Office', '≡ƒôÑ', 'Mesh tray and pen cups'],
-    ['Large Desk Pad', 2.50, 'Office', '≡ƒôï', 'Non-slip desk mat'],
-    ['Notebook 5-pack', 1.80, 'Office', '≡ƒôô', 'A5 ruled notebooks'],
-    ['Pen Set 12 Colours', 1.95, 'Office', 'Γ£Å∩╕Å', 'Gel pens assorted colours'],
+    ['Desk Organizer Set', 1.45, 'Office', 'ORG', 'Mesh tray and pen cups'],
+    ['Large Desk Pad', 2.50, 'Office', 'PAD', 'Non-slip desk mat'],
+    ['Notebook 5-pack', 1.80, 'Office', 'NOTE', 'A5 ruled notebooks'],
+    ['Pen Set 12 Colours', 1.95, 'Office', 'PEN', 'Gel pens assorted colours'],
 
-    ['Printer Paper A4 500', 1.10, 'Stationery', '≡ƒôä', '80gsm white copier paper'],
-    ['Sticky Notes 6pk', 1.50, 'Stationery', '≡ƒô¥', 'Assorted sizes and colours'],
-    ['Highlighter Set 4pk', 1.75, 'Stationery', '≡ƒûì∩╕Å', 'Chisel tip highlighters'],
-    ['Ring Binder A4', 0.85, 'Stationery', '≡ƒôÆ', '2-ring mechanism, durable cover'],
+    ['Printer Paper A4 500', 1.10, 'Stationery', 'PAPER', '80gsm white copier paper'],
+    ['Sticky Notes 6pk', 1.50, 'Stationery', 'STICKY', 'Assorted sizes and colours'],
+    ['Highlighter Set 4pk', 1.75, 'Stationery', 'HILITE', 'Chisel tip highlighters'],
+    ['Ring Binder A4', 0.85, 'Stationery', 'BINDER', '2-ring mechanism, durable cover'],
 
-    ['Blank DVDs 10pk', 1.20, 'Media', '≡ƒÆ┐', 'Writeable optical discs'],
-    ['USB Flash Drive 32GB', 1.10, 'Media', '≡ƒöæ', 'USB 3.0 swivel drive'],
-    ['External HDD 1TB', 3.50, 'Media', '≡ƒÆ╜', 'Powered desktop hard drive'],
-    ['SD Card 64GB', 1.85, 'Media', '≡ƒô╝', 'Class 10 UHS-I memory card'],
+    ['Blank DVDs 10pk', 1.20, 'Media', 'DVD', 'Writeable optical discs'],
+    ['USB Flash Drive 32GB', 1.10, 'Media', 'USB', 'USB 3.0 swivel drive'],
+    ['External HDD 1TB', 3.50, 'Media', 'HDD', 'Powered desktop hard drive'],
+    ['SD Card 64GB', 1.85, 'Media', 'SD', 'Class 10 UHS-I memory card'],
 
-    ['Screen Protector 2pk', 1.55, 'Gadgets', '≡ƒ¢í∩╕Å', 'Tempered glass universal size'],
-    ['Phone Stand Foldable', 1.25, 'Gadgets', '≡ƒô▒', 'Adjustable aluminium stand'],
-    ['Cable Ties 100pc', 2.30, 'Gadgets', '≡ƒöù', 'Reusable velcro ties'],
-    ['Power Bank 10000mAh', 1.00, 'Gadgets', '≡ƒöï', 'Dual USB output portable charger'],
+    ['Screen Protector 2pk', 1.55, 'Gadgets', 'GUARD', 'Tempered glass universal size'],
+    ['Phone Stand Foldable', 1.25, 'Gadgets', 'STAND', 'Adjustable aluminium stand'],
+    ['Cable Ties 100pc', 2.30, 'Gadgets', 'TIES', 'Reusable velcro ties'],
+    ['Power Bank 10000mAh', 1.00, 'Gadgets', 'BANK', 'Dual USB output portable charger'],
 
-    ['Desk Fan USB', 2.50, 'Home', '≡ƒîÇ', 'Quiet 3-speed mini fan'],
-    ['LED Strip 2m', 2.25, 'Home', 'Γ£¿', 'RGB with remote control'],
-    ['Air Purifier Mini', 2.75, 'Home', '≡ƒî¼∩╕Å', 'HEPA filter compact unit'],
-    ['Cable Management Box', 1.00, 'Home', '≡ƒôª', 'Hide power strips and cables'],
+    ['Desk Fan USB', 2.50, 'Home', 'FAN', 'Quiet 3-speed mini fan'],
+    ['LED Strip 2m', 2.25, 'Home', 'LED', 'RGB with remote control'],
+    ['Air Purifier Mini', 2.75, 'Home', 'PURIFY', 'HEPA filter compact unit'],
+    ['Cable Management Box', 1.00, 'Home', 'BOX', 'Hide power strips and cables'],
 
-    ['Screen Cleaning Kit', 1.50, 'General', '≡ƒº╜', 'Spray and microfibre cloth'],
-    ['Microfibre Cloths 5pk', 2.00, 'General', '≡ƒº║', 'Lint-free cleaning cloths'],
-    ['Precision Screwdriver Set', 1.25, 'General', '≡ƒ¬¢', 'Torx and Phillips bits'],
-    ['Storage Box Stackable', 1.75, 'General', '≡ƒùâ∩╕Å', 'Clear plastic with lid'],
+    ['Screen Cleaning Kit', 1.50, 'General', 'CLEAN', 'Spray and microfibre cloth'],
+    ['Microfibre Cloths 5pk', 2.00, 'General', 'CLOTH', 'Lint-free cleaning cloths'],
+    ['Precision Screwdriver Set', 1.25, 'General', 'TOOLS', 'Torx and Phillips bits'],
+    ['Storage Box Stackable', 1.75, 'General', 'STORE', 'Clear plastic with lid'],
   ];
 
   const insertProduct = db.prepare(
@@ -1128,7 +1128,7 @@ module.exports = router;</textarea>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Catalog Demo</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>≡ƒ¢Æ</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#128722;</text></svg>">
 </head>
 <body>
   <div id="root"></div>
@@ -1269,7 +1269,7 @@ export default App;</textarea>
 
 <div class="section" id="f-appcss">
 <h2>Frontend: src/App.css</h2>
-<p>All the styles for the entire application ΓÇö navbar, slide-out basket, footer, hero, product grid, cards, forms, checkout layout, auth pages, and responsive breakpoints. This is the longest file.</p>
+<p>All the styles for the entire application &mdash; navbar, slide-out basket, footer, hero, product grid, cards, forms, checkout layout, auth pages, and responsive breakpoints. This is the longest file.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/src/App.css</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
 <textarea readonly rows="80">.app {
@@ -2344,7 +2344,7 @@ function Navbar() {
       <nav className="navbar">
         <div className="navbar-content">
           <Link to="/" className="navbar-logo">
-            ≡ƒ¢Æ Catalog<span>Demo</span>
+            &#128722; Catalog<span>Demo</span>
           </Link>
 
           <div className="navbar-links">
@@ -2358,7 +2358,7 @@ function Navbar() {
 
           <div className="navbar-right">
             <button className="cart-btn" onClick={() => setCartOpen(true)}>
-              ≡ƒ¢Æ Basket
+              &#128722; Basket
               {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
             </button>
 
@@ -2380,13 +2380,13 @@ function Navbar() {
           <div className="cart-panel">
             <div className="cart-header">
               <h2>Your basket ({cartCount})</h2>
-              <button className="cart-close" onClick={() => setCartOpen(false)}>Γ£ò</button>
+              <button className="cart-close" onClick={() => setCartOpen(false)}>&#10005;</button>
             </div>
 
             <div className="cart-items">
               {cartItems.length === 0 ? (
                 <div className="cart-empty">
-                  <p style={{ fontSize: '3rem' }}>≡ƒ¢Æ</p>
+                  <p style={{ fontSize: '3rem' }}>&#128722;</p>
                   <p>Your basket is empty</p>
                 </div>
               ) : (
@@ -2395,14 +2395,14 @@ function Navbar() {
                     <div className="cart-item-emoji">{item.image_url}</div>
                     <div className="cart-item-info">
                       <h4>{item.name}</h4>
-                      <p>┬ú{(item.price * item.quantity).toFixed(2)}</p>
+                      <p>&pound;{(item.price * item.quantity).toFixed(2)}</p>
                     </div>
                     <div className="cart-item-controls">
-                      <button className="qty-btn" onClick={() => updateQuantity(item.id, item.quantity - 1)}>ΓêÆ</button>
+                      <button className="qty-btn" onClick={() => updateQuantity(item.id, item.quantity - 1)}>-</button>
                       <span>{item.quantity}</span>
                       <button className="qty-btn" onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
                     </div>
-                    <button className="cart-item-remove" onClick={() => removeFromCart(item.id)}>Γ£ò</button>
+                    <button className="cart-item-remove" onClick={() => removeFromCart(item.id)}>&#10005;</button>
                   </div>
                 ))
               )}
@@ -2412,7 +2412,7 @@ function Navbar() {
               <div className="cart-footer">
                 <div className="cart-total">
                   <span>Total</span>
-                  <span>┬ú{cartTotal.toFixed(2)}</span>
+                  <span>&pound;{cartTotal.toFixed(2)}</span>
                 </div>
                 <div className="cart-actions">
                   <Link
@@ -2420,14 +2420,14 @@ function Navbar() {
                     className="btn-delivery"
                     onClick={() => setCartOpen(false)}
                   >
-                    ≡ƒÜÜ Checkout for Delivery
+                    &#128666; Checkout for Delivery
                   </Link>
                   <Link
                     to="/collection"
                     className="btn-collection"
                     onClick={() => setCartOpen(false)}
                   >
-                    ≡ƒÅ¬ Checkout (pickup)
+                    &#127978; Checkout (pickup)
                   </Link>
                 </div>
               </div>
@@ -2479,16 +2479,16 @@ function ProductCard({ product, deal }) {
         <h3>{product.name}</h3>
         <p className="description">{product.description}</p>
         <div className="product-price">
-          <span className="current">┬ú{effectivePrice.toFixed(2)}</span>
+          <span className="current">&pound;{effectivePrice.toFixed(2)}</span>
           {deal && (
-            <span className="original">┬ú{product.price.toFixed(2)}</span>
+            <span className="original">&pound;{product.price.toFixed(2)}</span>
           )}
         </div>
         <button
           className={`add-to-cart-btn ${added ? 'added' : ''}`}
           onClick={handleAdd}
         >
-          {added ? 'Γ£ô Added' : 'Add to basket'}
+          {added ? '&#10004; Added' : 'Add to basket'}
         </button>
       </div>
     </div>
@@ -2513,14 +2513,14 @@ import ProductCard from '../components/ProductCard';
 const API = 'http://localhost:5000/api';
 
 const categoryEmojis = {
-  'Electronics': '≡ƒÆ╗',
-  'Peripherals': '≡ƒöî',
-  'Office': '≡ƒôÄ',
-  'Stationery': 'Γ£Å∩╕Å',
-  'Media': '≡ƒÆ┐',
-  'Gadgets': '≡ƒô▒',
-  'Home': '≡ƒÅá',
-  'General': '≡ƒôª'
+  'Electronics': '&#128187;',
+  'Peripherals': '&#128268;',
+  'Office': '&#128188;',
+  'Stationery': '&#9997;',
+  'Media': '&#128191;',
+  'Gadgets': '&#128241;',
+  'Home': '&#127968;',
+  'General': '&#128230;'
 };
 
 function Home() {
@@ -2557,7 +2557,7 @@ function Home() {
       <div className="category-grid">
         {categories.map(cat => (
           <Link to={`/products?category=${encodeURIComponent(cat)}`} key={cat} className="category-card">
-            <span className="emoji">{categoryEmojis[cat] || '≡ƒôª'}</span>
+            <span className="emoji">{categoryEmojis[cat] || '&#128230;'}</span>
             <span className="label">{cat}</span>
           </Link>
         ))}
@@ -2701,7 +2701,7 @@ function Products() {
         <div className="products-main">
           {products.length === 0 ? (
             <div className="empty-state">
-              <div className="icon">≡ƒöì</div>
+              <div className="icon">&#128269;</div>
               <h2>No products found</h2>
               <p>Try a different search term or category</p>
             </div>
@@ -2756,13 +2756,13 @@ function Deals() {
   return (
     <div>
       <div className="deals-banner">
-        <h1>≡ƒöÑ Promotions</h1>
+        <h1>&#128293; Promotions</h1>
         <p>Discounted items from the catalog</p>
       </div>
 
       {deals.length === 0 ? (
         <div className="empty-state">
-          <div className="icon">≡ƒÅ╖∩╕Å</div>
+          <div className="icon">&#127942;</div>
           <h2>No promotions right now</h2>
           <p>Check back later for discounts</p>
         </div>
@@ -2825,7 +2825,7 @@ function OrderHistory() {
   if (!user) {
     return (
       <div className="empty-state">
-        <div className="icon">≡ƒöÆ</div>
+        <div className="icon">&#128274;</div>
         <h2>Please log in</h2>
         <p>You need to be logged in to view your order history</p>
         <Link to="/login">Login</Link>
@@ -2841,7 +2841,7 @@ function OrderHistory() {
 
       {orders.length === 0 ? (
         <div className="empty-state">
-          <div className="icon">≡ƒôª</div>
+          <div className="icon">&#128230;</div>
           <h2>No orders yet</h2>
           <p>Place an order to see history here</p>
           <Link to="/products">Browse catalog</Link>
@@ -2865,18 +2865,18 @@ function OrderHistory() {
               {order.items.map(item => (
                 <div key={item.id} className="order-item-row">
                   <span>{item.image_url} {item.name} x{item.quantity}</span>
-                  <span>┬ú{(item.price * item.quantity).toFixed(2)}</span>
+                  <span>&pound;{(item.price * item.quantity).toFixed(2)}</span>
                 </div>
               ))}
             </div>
 
             <div className="order-meta">
               <span>
-                {order.order_type === 'delivery' ? '≡ƒÜÜ Delivery' : '≡ƒÅ¬ Collection'}
+                {order.order_type === 'delivery' ? '&#128666; Delivery' : '&#127978; Collection'}
                 {order.order_type === 'delivery' && order.delivery_address && ` - ${order.delivery_address}`}
                 {order.order_type === 'collection' && order.store_location && ` - ${order.store_location}`}
               </span>
-              <span className="order-total">Total: ┬ú{order.total.toFixed(2)}</span>
+              <span className="order-total">Total: &pound;{order.total.toFixed(2)}</span>
             </div>
           </div>
         ))
@@ -2943,7 +2943,7 @@ function Rewards() {
   if (!user) {
     return (
       <div className="empty-state">
-        <div className="icon">≡ƒöÆ</div>
+        <div className="icon">&#128274;</div>
         <h2>Please log in</h2>
         <p>You need to be logged in to view your rewards</p>
         <Link to="/login">Login</Link>
@@ -2956,10 +2956,10 @@ function Rewards() {
   return (
     <div>
       <div className="rewards-header">
-        <h1>≡ƒÄë Your Rewards</h1>
+        <h1>&#127881; Your Rewards</h1>
         <div className="rewards-points">{rewardsData?.total_points || 0}</div>
         <p className="rewards-value">
-          Points worth ┬ú{((rewardsData?.total_points || 0) / 100).toFixed(2)} in vouchers
+          Points worth &pound;{((rewardsData?.total_points || 0) / 100).toFixed(2)} in vouchers
         </p>
         {rewardsData?.total_points >= 100 && (
           <button
@@ -2969,7 +2969,7 @@ function Rewards() {
               padding: '12px 24px', borderRadius: 8, fontWeight: 700, border: 'none', cursor: 'pointer'
             }}
           >
-            Redeem 100 Points (┬ú1.00 off)
+            Redeem 100 Points (&pound;1.00 off)
           </button>
         )}
       </div>
@@ -2980,7 +2980,7 @@ function Rewards() {
         <div className="empty-state">
           <div className="icon">Γ¡É</div>
           <h2>No rewards yet</h2>
-          <p>Earn 1 point for every ┬ú1 you spend</p>
+          <p>Earn 1 point for every &pound;1 you spend</p>
           <Link to="/products">Browse catalog</Link>
         </div>
       ) : (
@@ -3075,7 +3075,7 @@ function Collection() {
   if (!user) {
     return (
       <div className="empty-state">
-        <div className="icon">≡ƒöÆ</div>
+        <div className="icon">&#128274;</div>
         <h2>Please log in</h2>
         <p>You need to be logged in to place an order</p>
         <Link to="/login">Login</Link>
@@ -3086,7 +3086,7 @@ function Collection() {
   if (cartItems.length === 0 && !success) {
     return (
       <div className="empty-state">
-        <div className="icon">≡ƒ¢Æ</div>
+        <div className="icon">&#128722;</div>
         <h2>Your basket is empty</h2>
         <p>Add some products before checkout</p>
         <Link to="/products">Browse catalog</Link>
@@ -3097,13 +3097,13 @@ function Collection() {
   if (success) {
     return (
       <div className="success-message">
-        <div className="icon">Γ£à</div>
+        <div className="icon">&#10004;</div>
         <h2>Order Placed Successfully!</h2>
-        <p>Order #{orderDetails.id} - Total: ┬ú{orderDetails.total.toFixed(2)}</p>
+        <p>Order #{orderDetails.id} - Total: &pound;{orderDetails.total.toFixed(2)}</p>
         <p>You earned <strong>{orderDetails.points_earned} reward points</strong>!</p>
         <p style={{ marginTop: 8, color: '#666' }}>
-          ≡ƒÅ¬ Collect from: {STORE_NAME}<br />
-          ≡ƒôà {date} at {time}
+          &#127978; Collect from: {STORE_NAME}<br />
+          &#128197; {date} at {time}
         </p>
         <div style={{ marginTop: 24, display: 'flex', gap: 12, justifyContent: 'center' }}>
           <Link to="/order-history" className="hero-btn" style={{ fontSize: '0.9rem', padding: '10px 20px' }}>
@@ -3121,7 +3121,7 @@ function Collection() {
 
   return (
     <div>
-      <h1 style={{ marginBottom: 24 }}>≡ƒÅ¬ Store pickup</h1>
+      <h1 style={{ marginBottom: 24 }}>&#127978; Store pickup</h1>
 
       <div className="checkout-layout">
         <form className="checkout-form" onSubmit={handleSubmit}>
@@ -3159,7 +3159,7 @@ function Collection() {
             className="place-order-btn"
             disabled={!date || !time}
           >
-            Place Collection Order - ┬ú{cartTotal.toFixed(2)}
+            Place Collection Order - &pound;{cartTotal.toFixed(2)}
           </button>
         </form>
 
@@ -3168,12 +3168,12 @@ function Collection() {
           {cartItems.map(item => (
             <div key={item.id} className="summary-item">
               <span>{item.image_url} {item.name} x{item.quantity}</span>
-              <span>┬ú{(item.price * item.quantity).toFixed(2)}</span>
+              <span>&pound;{(item.price * item.quantity).toFixed(2)}</span>
             </div>
           ))}
           <div className="summary-total">
             <span>Total</span>
-            <span>┬ú{cartTotal.toFixed(2)}</span>
+            <span>&pound;{cartTotal.toFixed(2)}</span>
           </div>
         </div>
       </div>
@@ -3187,7 +3187,7 @@ export default Collection;</textarea>
 
 <div class="section" id="p-delivery">
 <h2>Page: Delivery.js</h2>
-<p>Home delivery checkout page. User enters their address, postcode, selects a date and time slot. Includes a delivery fee (┬ú3.99, free over ┬ú40). Order summary with running total. Success screen on completion.</p>
+<p>Home delivery checkout page. User enters their address, postcode, selects a date and time slot. Includes a delivery fee (&pound;3.99, free over &pound;40). Order summary with running total. Success screen on completion.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/src/pages/Delivery.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
 <textarea readonly rows="62">// Delivery.js — Home delivery checkout page with address + time slot
@@ -3251,7 +3251,7 @@ function Delivery() {
   if (!user) {
     return (
       <div className="empty-state">
-        <div className="icon">≡ƒöÆ</div>
+        <div className="icon">&#128274;</div>
         <h2>Please log in</h2>
         <p>You need to be logged in to place an order</p>
         <Link to="/login">Login</Link>
@@ -3262,7 +3262,7 @@ function Delivery() {
   if (cartItems.length === 0 && !success) {
     return (
       <div className="empty-state">
-        <div className="icon">≡ƒ¢Æ</div>
+        <div className="icon">&#128722;</div>
         <h2>Your basket is empty</h2>
         <p>Add some products before checkout</p>
         <Link to="/products">Browse catalog</Link>
@@ -3273,13 +3273,13 @@ function Delivery() {
   if (success) {
     return (
       <div className="success-message">
-        <div className="icon">Γ£à</div>
+        <div className="icon">&#10004;</div>
         <h2>Order Placed Successfully!</h2>
-        <p>Order #{orderDetails.id} - Total: ┬ú{orderDetails.total.toFixed(2)}</p>
+        <p>Order #{orderDetails.id} - Total: &pound;{orderDetails.total.toFixed(2)}</p>
         <p>You earned <strong>{orderDetails.points_earned} reward points</strong>!</p>
         <p style={{ marginTop: 8, color: '#666' }}>
-          ≡ƒÜÜ Delivering to: {address}, {postcode}<br />
-          ≡ƒôà {date} at {time}
+          &#128666; Delivering to: {address}, {postcode}<br />
+          &#128197; {date} at {time}
         </p>
         <div style={{ marginTop: 24, display: 'flex', gap: 12, justifyContent: 'center' }}>
           <Link to="/order-history" className="hero-btn" style={{ fontSize: '0.9rem', padding: '10px 20px' }}>
@@ -3298,7 +3298,7 @@ function Delivery() {
 
   return (
     <div>
-      <h1 style={{ marginBottom: 24 }}>≡ƒÜÜ Delivery</h1>
+      <h1 style={{ marginBottom: 24 }}>&#128666; Delivery</h1>
 
       <div className="checkout-layout">
         <form className="checkout-form" onSubmit={handleSubmit}>
@@ -3349,7 +3349,7 @@ function Delivery() {
 
           {deliveryFee > 0 && (
             <p style={{ fontSize: '0.85rem', color: '#e31837', marginBottom: 8 }}>
-              Delivery fee: ┬ú{deliveryFee.toFixed(2)} (Free delivery on orders over ┬ú40)
+              Delivery fee: &pound;{deliveryFee.toFixed(2)} (Free delivery on orders over &pound;40)
             </p>
           )}
 
@@ -3358,7 +3358,7 @@ function Delivery() {
             className="place-order-btn"
             disabled={!address || !postcode || !date || !time}
           >
-            Place Delivery Order - ┬ú{(cartTotal + deliveryFee).toFixed(2)}
+            Place Delivery Order - &pound;{(cartTotal + deliveryFee).toFixed(2)}
           </button>
         </form>
 
@@ -3367,16 +3367,16 @@ function Delivery() {
           {cartItems.map(item => (
             <div key={item.id} className="summary-item">
               <span>{item.image_url} {item.name} x{item.quantity}</span>
-              <span>┬ú{(item.price * item.quantity).toFixed(2)}</span>
+              <span>&pound;{(item.price * item.quantity).toFixed(2)}</span>
             </div>
           ))}
           <div className="summary-item" style={{ color: deliveryFee === 0 ? '#27ae60' : '#333' }}>
             <span>Delivery</span>
-            <span>{deliveryFee === 0 ? 'FREE' : `┬ú${deliveryFee.toFixed(2)}`}</span>
+            <span>{deliveryFee === 0 ? 'FREE' : `&pound;${deliveryFee.toFixed(2)}`}</span>
           </div>
           <div className="summary-total">
             <span>Total</span>
-            <span>┬ú{(cartTotal + deliveryFee).toFixed(2)}</span>
+            <span>&pound;{(cartTotal + deliveryFee).toFixed(2)}</span>
           </div>
         </div>
       </div>
@@ -3678,7 +3678,7 @@ function Admin() {
                 &lt;tr key={p.id} style={{ borderBottom: '1px solid #e2e8f0' }}&gt;
                   &lt;td style={{ padding: 8 }}&gt;{p.id}&lt;/td&gt;
                   &lt;td style={{ padding: 8 }}&gt;{p.image_url} {p.name}&lt;/td&gt;
-                  &lt;td style={{ padding: 8 }}&gt;&amp;pound;{p.price.toFixed(2)}&lt;/td&gt;
+                  &lt;td style={{ padding: 8 }}&gt;&pound;{p.price.toFixed(2)}&lt;/td&gt;
                   &lt;td style={{ padding: 8 }}&gt;{p.category}&lt;/td&gt;
                   &lt;td style={{ padding: 8 }}&gt;{p.stock}&lt;/td&gt;
                   &lt;td style={{ padding: 8 }}&gt;
@@ -3707,7 +3707,7 @@ function Admin() {
                   &lt;br /&gt;
                   &lt;small&gt;Type: {order.order_type} | Date: {order.created_at}&lt;/small&gt;
                   &lt;br /&gt;
-                  &lt;small&gt;Total: &amp;pound;{order.total.toFixed(2)}&lt;/small&gt;
+                  &lt;small&gt;Total: &pound;{order.total.toFixed(2)}&lt;/small&gt;
                 &lt;/div&gt;
                 &lt;div&gt;
                   &lt;label&gt;Status: &lt;/label&gt;
@@ -3726,7 +3726,7 @@ function Admin() {
               {order.items &amp;&amp; order.items.length &gt; 0 &amp;&amp; (
                 &lt;ul style={{ marginTop: 8, paddingLeft: 20, fontSize: '0.85rem' }}&gt;
                   {order.items.map((item, i) =&gt; (
-                    &lt;li key={i}&gt;{item.product_name} x{item.quantity} — &amp;pound;{(item.price * item.quantity).toFixed(2)}&lt;/li&gt;
+                    &lt;li key={i}&gt;{item.product_name} x{item.quantity} — &pound;{(item.price * item.quantity).toFixed(2)}&lt;/li&gt;
                   ))}
                 &lt;/ul&gt;
               )}
