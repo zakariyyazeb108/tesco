@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Plain Editor</title>
+  <title>Code Studio</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -189,7 +189,64 @@
       border-top: 1px solid var(--border);
       flex-shrink: 0;
     }
-    #plain-ui { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+    #plain-ui { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+    .ide-row { display: flex; flex: 1; min-height: 0; }
+    .activity-bar {
+      width: 48px; flex-shrink: 0; background: #333333;
+      border-right: 1px solid #252526; display: flex; flex-direction: column;
+      align-items: center; padding: 8px 0; gap: 6px;
+    }
+    .activity-bar button {
+      width: 36px; height: 36px; border: none; border-radius: 4px; cursor: pointer;
+      background: transparent; color: #ccc; font-size: 18px;
+    }
+    .activity-bar button:hover { background: rgba(255,255,255,.12); color: #fff; }
+    .activity-bar button.active { border-left: 2px solid #0078d4; }
+    .ide-main-col { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+    .explorer {
+      width: 220px; flex-shrink: 0; background: var(--bg-upper);
+      border-right: 1px solid var(--border); font-size: 12px; color: var(--text-dim);
+      display: flex; flex-direction: column; min-height: 0;
+    }
+    .explorer-h { padding: 8px 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; font-size: 11px; }
+    .explorer-tree { padding: 4px 8px 12px; overflow-y: auto; flex: 1; font-family: Consolas, monospace; line-height: 1.6; }
+    .explorer-tree .folder { color: #e0c36a; }
+    .explorer-tree .file { padding-left: 12px; cursor: pointer; }
+    .explorer-tree .file:hover { background: rgba(128,128,128,.15); }
+    .breadcrumb-bar {
+      height: 22px; background: var(--bg); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 12px; font-size: 11px; color: var(--text-dim);
+      flex-shrink: 0;
+    }
+    .panel-bottom {
+      height: 0; overflow: hidden; border-top: 1px solid var(--border); background: var(--bg);
+      transition: height .15s ease; flex-shrink: 0;
+    }
+    .panel-bottom.open { height: 120px; overflow: auto; }
+    .panel-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); font-size: 11px; }
+    .panel-tabs button { padding: 4px 12px; border: none; background: transparent; color: var(--text-dim); cursor: pointer; }
+    .panel-tabs button.on { color: var(--text); border-bottom: 1px solid var(--accent); }
+    .panel-body { padding: 8px 12px; font-family: Consolas, monospace; font-size: 11px; color: var(--text-dim); }
+    .cmd-palette {
+      position: fixed; left: 0; right: 0; top: 0; bottom: 0; background: rgba(0,0,0,.45);
+      z-index: 9999; display: none; align-items: flex-start; justify-content: center; padding-top: 80px;
+    }
+    .cmd-palette.open { display: flex; }
+    .cmd-box {
+      width: 560px; max-width: 92vw; background: var(--bg-input); border: 1px solid var(--border);
+      border-radius: 6px; box-shadow: 0 8px 32px rgba(0,0,0,.4); overflow: hidden;
+    }
+    .cmd-input {
+      width: 100%; padding: 12px 14px; border: none; background: var(--bg-input); color: var(--text);
+      font-size: 13px; outline: none; font-family: inherit;
+    }
+    .cmd-list { border-top: 1px solid var(--border); max-height: 220px; overflow-y: auto; font-size: 12px; }
+    .cmd-list div { padding: 8px 14px; cursor: pointer; color: var(--text-dim); }
+    .cmd-list div:hover { background: rgba(0,120,212,.25); color: var(--text); }
+    .statusbar .sb-item { opacity: .95; }
+    @media (max-width: 700px) {
+      .explorer { display: none; }
+    }
   </style>
   <style>
 /* Scoped to guide so Plain Editor theme vars never leak in */
@@ -227,47 +284,97 @@
 </head>
 <body>
 <div id="plain-ui">
-  <header class="titlebar">
-    <h1 class="logo-hit" id="plain-logo" title="Triple-click">Plain Editor</h1>
-    <span style="font-size:11px;color:var(--text-dim)">No highlighting · No debugger · Just text</span>
-    <div class="titlebar-actions">
-      <button type="button" id="btnTheme" title="Switch theme">Theme</button>
+  <div class="ide-row">
+    <aside class="activity-bar" title="Activity">
+      <button type="button" class="active" id="actFiles" title="Explorer">&#9776;</button>
+      <button type="button" id="actSearch" title="Search">&#128269;</button>
+      <button type="button" id="actGit" title="Source Control">&#9084;</button>
+      <button type="button" id="actRun" title="Run">&#9654;</button>
+      <div style="flex:1"></div>
+      <button type="button" id="actAccount" title="Accounts">&#9679;</button>
+    </aside>
+    <aside class="explorer" id="explorerPane">
+      <div class="explorer-h">Explorer</div>
+      <div class="explorer-tree" id="explorerTree">
+        <div class="folder">OPEN EDITORS</div>
+        <div class="file" data-crumb="Untitled-1">Untitled-1</div>
+        <div class="folder" style="margin-top:8px">SHOP-PROJECT</div>
+        <div class="file" data-crumb="backend/package.json">package.json</div>
+        <div class="file" data-crumb="backend/server.js">server.js</div>
+        <div class="file" data-crumb="frontend/src/App.js">src/App.js</div>
+        <div class="file" data-crumb="README.md">README.md</div>
+      </div>
+    </aside>
+    <div class="ide-main-col">
+      <header class="titlebar">
+        <h1 class="logo-hit" id="plain-logo" title="Triple-click logo">Code Studio</h1>
+        <span style="font-size:11px;color:var(--text-dim)">Lightweight editor &mdash; no extensions</span>
+        <div class="titlebar-actions">
+          <button type="button" id="btnPalette" title="Command Palette (Ctrl+Shift+P)">Commands</button>
+          <button type="button" id="btnPanel" title="Toggle panel">Panel</button>
+          <button type="button" id="btnTheme" title="Theme">Theme</button>
+        </div>
+      </header>
+      <div class="breadcrumb-bar" id="breadcrumb">SHOP-PROJECT &gt; Untitled-1</div>
+      <nav class="menubar">
+        <button type="button" id="mNew">New file</button>
+        <button type="button" id="mOpen">Open&hellip;</button>
+        <button type="button" id="mSave">Save</button>
+      </nav>
+      <div class="editor-wrap">
+        <div class="tab-row" id="tabs"></div>
+        <div class="editor-panel">
+          <textarea class="editor" id="editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+        </div>
+        <p class="hint">Ctrl+Shift+P command palette &middot; Tab = spaces &middot; plain text only</p>
+      </div>
+      <div class="panel-bottom" id="bottomPanel">
+        <div class="panel-tabs">
+          <button type="button" class="on" data-panel="out">OUTPUT</button>
+          <button type="button" data-panel="term">TERMINAL</button>
+          <button type="button" data-panel="prob">PROBLEMS</button>
+        </div>
+        <div class="panel-body" id="panelOut">Ready. No tasks running.</div>
+        <div class="panel-body" id="panelTerm" style="display:none">local shell not connected (browser mode)</div>
+        <div class="panel-body" id="panelProb" style="display:none">No problems found.</div>
+      </div>
+      <footer class="statusbar">
+        <span class="sb-item" id="stLines">Ln 1, Col 1</span>
+        <span class="sb-item" id="stChars">0 chars</span>
+        <span class="sb-item">UTF-8</span>
+        <span class="sb-item">LF</span>
+        <span class="sb-item">Spaces: 4</span>
+        <span class="sb-item" id="stName" style="margin-left:auto">Untitled-1</span>
+      </footer>
     </div>
-  </header>
-
-  <nav class="menubar">
-    <button type="button" id="mNew">New file</button>
-    <button type="button" id="mOpen">Open…</button>
-    <button type="button" id="mSave">Save</button>
-  </nav>
-
-  <div class="editor-wrap">
-    <div class="tab-row" id="tabs"></div>
-    <div class="editor-panel">
-      <textarea class="editor" id="editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
-    </div>
-    <p class="hint">Tip: Tab inserts spaces. Everything is plain text — what you type is what you get.</p>
   </div>
+</div>
 
-  <footer class="statusbar">
-    <span id="stLines">Lines: 1</span>
-    <span id="stChars">Characters: 0</span>
-    <span id="stName" style="margin-left:auto">Untitled</span>
-  </footer>
+<div class="cmd-palette" id="cmdPalette" aria-hidden="true">
+  <div class="cmd-box">
+    <input type="text" class="cmd-input" id="cmdInput" placeholder="Type a command (Esc to close)" autocomplete="off">
+    <div class="cmd-list" id="cmdList">
+      <div data-cmd="new">File: New File</div>
+      <div data-cmd="save">File: Save</div>
+      <div data-cmd="theme">Preferences: Toggle Theme</div>
+      <div data-cmd="panel">View: Toggle Bottom Panel</div>
+    </div>
+  </div>
 </div>
 
 <input type="file" id="fileOpen" accept="text/*,.md,.json,.html,.css,.js,.txt">
 
 <div id="secret-guide" hidden>
 <div class="header" id="tutorial-topbar">
-<h1>Full-Stack Web Development Tutorial: Sample Catalog App</h1>
-<span>React + Node.js + SQLite</span>
+<h1>Shop coursework walkthrough (React + Node + SQLite)</h1>
+<span>T-level style notes</span>
 </div>
 
 <nav class="sidebar">
 <h3>Getting Started</h3>
 <a href="#structure">Project Structure</a>
 <a href="#commands">Setup Commands</a>
+<a href="#vagrant">Vagrant (VM)</a>
 <h3>Backend</h3>
 <a href="#b-pkg">package.json</a>
 <a href="#b-db">database.js</a>
@@ -319,7 +426,7 @@
 |       |-- products.js
 |       |-- orders.js
 |       |-- users.js
-|       +-- admin.js          &lt;-- NEW
+|       +-- admin.js
 +-- frontend/
     |-- package.json
     |-- public/
@@ -344,44 +451,59 @@
             |-- Collection.js
             |-- Delivery.js
             |-- Login.js
-            +-- Admin.js          &lt;-- NEW</div>
+            +-- Admin.js</div>
 </div>
 
 <div class="section" id="commands">
 <h2>Setup Commands</h2>
-<p>Run these terminal commands in order to get the project running.</p>
+<p>Rough order — your teacher might want screenshots of each step.</p>
 <div class="step-box">
 <ol>
-<li>Create the project folders: <code>mkdir backend</code> then <code>mkdir frontend</code></li>
-<li>Create the frontend with React: <code>cd frontend</code> then <code>npx create-react-app .</code> (or manually create package.json and run <code>npm install</code>)</li>
-<li>Install backend dependencies: <code>cd backend</code> then <code>npm install</code></li>
-<li>Create the route folder: <code>mkdir routes</code> (inside backend)</li>
-<li>Create all the files listed above and paste the code from each section below</li>
-<li>Seed the database: <code>cd backend</code> then <code>node seed.js</code></li>
-<li>Start the backend: <code>node server.js</code> (runs on port 5000)</li>
-<li>Start the frontend: <code>cd frontend</code> then <code>npm start</code> (runs on port 3000)</li>
+<li>Make folders: <code>mkdir backend</code> and <code>mkdir frontend</code></li>
+<li>React app: <code>cd frontend</code> then <code>npx create-react-app .</code> (or copy a package.json and run <code>npm install</code>)</li>
+<li>Backend deps: <code>cd backend</code> then <code>npm install</code></li>
+<li>Inside backend: <code>mkdir routes</code></li>
+<li>Copy the files from below into the right places</li>
+<li>Reset empty DB: <code>cd backend</code> then <code>node seed.js</code> (wipes tables — no starter products)</li>
+<li>API: <code>node server.js</code> on port 5000</li>
+<li>React: <code>cd frontend</code> then <code>npm start</code> on port 3000</li>
 </ol>
 </div>
-<div class="tip">Demo login after seeding: <strong>john@email.com</strong> / <strong>password123</strong></div>
+<div class="tip">First time: register on Login, then add stock in <strong>Admin</strong>. Shop stays empty until you do. No card / payment step — not needed for the brief.</div>
+</div>
+
+<div class="section" id="vagrant">
+<h2>Vagrant setup</h2>
+<p>Tested with <strong>Vagrant 2.4.9</strong>. Guest VM should use <strong>Node 22.22.2</strong> and <strong>npm 10.9.7</strong> (or close — run <code>node -v</code> / <code>npm -v</code> inside the VM).</p>
+<div class="step-box">
+<ol>
+<li>Put <code>Vagrantfile</code> and <code>provision-vm.sh</code> in the same folder as <code>backend/</code> and <code>frontend/</code> (repo root).</li>
+<li><code>vagrant up</code> — first boot installs Node via the provision script.</li>
+<li><code>vagrant ssh</code> then <code>cd /vagrant</code> (project is mounted there).</li>
+<li>Ports 5000 and 3000 are forwarded to your Windows machine — open <code>http://localhost:3000</code> in Edge/Chrome on the host.</li>
+<li>Inside the VM: <code>cd backend &amp;&amp; npm install &amp;&amp; node seed.js &amp;&amp; node server.js</code> in one terminal, and <code>cd frontend &amp;&amp; npm install &amp;&amp; npm start</code> in another (or use <code>screen</code>/<code>tmux</code>).</li>
+<li>If the React dev server binds only to localhost inside the VM, that still works with Vagrant port forwarding.</li>
+</ol>
+</div>
+<p class="tip">If VirtualBox complains about VT-x, turn on virtualisation in BIOS or use WSL2 instead of Vagrant — same Node commands apply.</p>
 </div>
 
 <!-- ==================== BACKEND ==================== -->
 <div class="section" id="b-pkg">
-<h2>Backend: package.json</h2> <span class="changed-tag">CHANGED</span>
-<p>Dependencies: Express for the server, cors for cross-origin requests, sql.js for SQLite. No password hashing library needed — passwords are stored as plain text for simplicity.</p>
+<h2>Backend: package.json</h2>
+<p>Express + sql.js only. Skipping cors so the file stays small (same machine = fine for marking).</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">backend/package.json</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="16">{
-  "name": "catalog-api-backend",
+<textarea readonly rows="14">{
+  "name": "shop-backend",
   "version": "1.0.0",
-  "description": "Demo REST API for coursework",
+  "description": "coursework api",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "seed": "node seed.js"
   },
   "dependencies": {
-    "cors": "^2.8.5",
     "express": "^4.18.2",
     "sql.js": "^1.10.0"
   }
@@ -390,33 +512,30 @@
 </div>
 
 <div class="section" id="b-db">
-<h2>Backend: database.js</h2> <span class="changed-tag">CHANGED</span>
-<p>Sets up the SQLite database using sql.js. Creates a Statement wrapper class so we can use <code>.prepare().all()</code>, <code>.get()</code> and <code>.run()</code> methods. Also creates all 6 tables: users, products, deals, orders, order_items, and rewards. Comments added throughout.</p>
+<h2>Backend: database.js</h2>
+<p>sql.js so you don&apos;t fight Visual Studio build tools. The Statement class is just so routes can keep using <code>.prepare().all()</code> like the tutorials online.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">backend/database.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="65">// database.js — SQLite setup using sql.js (pure JS, no native modules needed)
-const initSqlJs = require('sql.js');
+<textarea readonly rows="58">const initSqlJs = require('sql.js');
 const fs = require('fs');
 const path = require('path');
 
-// Path where the database file is stored on disk
-const DB_PATH = path.join(__dirname, 'catalog.db');
+// file ends up next to server.js
+const DB_PATH = path.join(__dirname, 'grocery.db');
 
-let db; // holds the sql.js Database instance
+let db;
 
-// Persist the in-memory database to a file after every write
 function save() {
   const data = db.export();
   fs.writeFileSync(DB_PATH, Buffer.from(data));
 }
 
-// Wrapper class that mimics better-sqlite3's .prepare().all/get/run API
+// fake better-sqlite3 style API
 class Statement {
   constructor(sql) {
     this.sql = sql;
   }
 
-  // Return all matching rows as an array of objects
   all(...params) {
     const stmt = db.prepare(this.sql);
     if (params.length) stmt.bind(params);
@@ -428,7 +547,6 @@ class Statement {
     return results;
   }
 
-  // Return the first matching row, or null
   get(...params) {
     const stmt = db.prepare(this.sql);
     if (params.length) stmt.bind(params);
@@ -440,12 +558,11 @@ class Statement {
     return result;
   }
 
-  // Execute an INSERT/UPDATE/DELETE and return lastInsertRowid + changes count
   run(...params) {
     db.run(this.sql, params);
     const lastId = db.exec("SELECT last_insert_rowid() as id");
     const changes = db.exec("SELECT changes() as cnt");
-    save(); // persist after every mutation
+    save();
     return {
       lastInsertRowid: lastId[0]?.values[0]?.[0] || 0,
       changes: changes[0]?.values[0]?.[0] || 0
@@ -453,7 +570,6 @@ class Statement {
   }
 }
 
-// Public wrapper object the rest of the app uses
 const dbWrapper = {
   prepare(sql) {
     return new Statement(sql);
@@ -464,15 +580,14 @@ const dbWrapper = {
   }
 };
 
-// Initialise the database: load from file or create fresh, then create tables
 async function initDatabase() {
   const SQL = await initSqlJs();
 
   if (fs.existsSync(DB_PATH)) {
     const buffer = fs.readFileSync(DB_PATH);
-    db = new SQL.Database(buffer); // load existing db
+    db = new SQL.Database(buffer);
   } else {
-    db = new SQL.Database(); // brand new db
+    db = new SQL.Database();
   }
 
   db.run(`
@@ -564,44 +679,37 @@ module.exports = { initDatabase, getDb };</textarea>
 </div>
 
 <div class="section" id="b-server">
-<h2>Backend: server.js</h2> <span class="changed-tag">CHANGED</span>
-<p>Main entry point. Initializes the database, sets up Express with CORS and JSON middleware, mounts all API routes (including the new admin routes), and starts listening on port 5000.</p>
+<h2>Backend: server.js</h2>
+<p>Waits for <code>initDatabase()</code> then wires routes. No cors package — saves a dependency.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">backend/server.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="25">// server.js — Express API entry point
-const express = require('express');
-const cors = require('cors');
+<textarea readonly rows="28">const express = require('express');
 const { initDatabase } = require('./database');
 
 async function startServer() {
-  // Must wait for the database to be ready before loading routes
   await initDatabase();
 
-  // Import route handlers
   const productRoutes = require('./routes/products');
   const orderRoutes = require('./routes/orders');
   const userRoutes = require('./routes/users');
-  const adminRoutes = require('./routes/admin'); // NEW — admin dashboard API
+  const adminRoutes = require('./routes/admin');
 
   const app = express();
   const PORT = 5000;
 
-  app.use(cors());          // allow cross-origin requests from React dev server
-  app.use(express.json());  // parse JSON request bodies
+  app.use(express.json());
 
-  // Mount route groups
   app.use('/api/products', productRoutes);
   app.use('/api/orders', orderRoutes);
   app.use('/api/users', userRoutes);
-  app.use('/api/admin', adminRoutes); // NEW — admin endpoints
+  app.use('/api/admin', adminRoutes);
 
-  // Health check endpoint
   app.get('/', (req, res) => {
-    res.json({ message: 'Demo API running' });
+    res.json({ ok: true });
   });
 
   app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log('http://localhost:' + PORT);
   });
 }
 
@@ -610,18 +718,16 @@ startServer();</textarea>
 </div>
 
 <div class="section" id="b-seed">
-<h2>Backend: seed.js</h2> <span class="changed-tag">CHANGED</span>
-<p>Run with <code>node seed.js</code> to populate the database with sample products, deals, demo users, and order history. Passwords are stored in plain text (no hashing). Collection orders use a single store name.</p>
+<h2>Backend: seed.js</h2>
+<p>Only clears tables — no fake stock. You add real rows through Admin so the marker can see you doing CRUD. Run again if you want a clean slate (wipes users too).</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">backend/seed.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="60">// seed.js — Populate the database with sample data
-const { initDatabase, getDb } = require('./database');
+<textarea readonly rows="22">const { initDatabase, getDb } = require('./database');
 
 async function seed() {
   await initDatabase();
   const db = getDb();
 
-  // Clear all tables so we start fresh each time
   db.exec('DELETE FROM rewards');
   db.exec('DELETE FROM order_items');
   db.exec('DELETE FROM orders');
@@ -629,107 +735,7 @@ async function seed() {
   db.exec('DELETE FROM products');
   db.exec('DELETE FROM users');
 
-  // Insert demo users — plain text passwords (no hashing)
-  db.prepare('INSERT INTO users (name, email, password, reward_points) VALUES (?, ?, ?, ?)').run(
-    'John Smith', 'john@email.com', 'password123', 250
-  );
-  db.prepare('INSERT INTO users (name, email, password, reward_points) VALUES (?, ?, ?, ?)').run(
-    'Jane Doe', 'jane@email.com', 'password123', 180
-  );
-
-  const products = [
-    ['LED Desk Lamp', 2.00, 'Electronics', 'LAMP', 'Adjustable brightness desk lamp'],
-    ['Wireless Mouse', 0.75, 'Electronics', 'MOUSE', 'Compact optical mouse'],
-    ['USB-C Cable 2m', 0.55, 'Electronics', 'CABLE', 'Braided charging cable'],
-    ['HD Webcam', 0.69, 'Electronics', 'CAM', '720p plug-and-play webcam'],
-    ['Bluetooth Speaker Mini', 2.25, 'Electronics', 'SPKR', 'Portable rechargeable speaker'],
-    ['Monitor Stand', 2.50, 'Electronics', 'STAND', 'Aluminium riser for monitors'],
-    ['Mechanical Keyboard', 1.80, 'Electronics', 'KB', 'Tactile switches, UK layout'],
-    ['Laptop Sleeve 15"', 0.65, 'Electronics', 'SLEEVE', 'Padded protective sleeve'],
-
-    ['USB-C Hub 7-in-1', 3.50, 'Peripherals', 'HUB', 'HDMI, USB-A, SD, power pass-through'],
-    ['HDMI Cable 2m', 3.25, 'Peripherals', 'HDMI', 'High-speed 4K capable'],
-    ['External SSD 500GB', 4.00, 'Peripherals', 'SSD', 'USB 3.2 portable drive'],
-    ['Docking Station', 2.75, 'Peripherals', 'DOCK', 'Laptop dock with display outputs'],
-    ['Card Reader USB-C', 4.50, 'Peripherals', 'READER', 'SD and microSD slots'],
-
-    ['Desk Organizer Set', 1.45, 'Office', 'ORG', 'Mesh tray and pen cups'],
-    ['Large Desk Pad', 2.50, 'Office', 'PAD', 'Non-slip desk mat'],
-    ['Notebook 5-pack', 1.80, 'Office', 'NOTE', 'A5 ruled notebooks'],
-    ['Pen Set 12 Colours', 1.95, 'Office', 'PEN', 'Gel pens assorted colours'],
-
-    ['Printer Paper A4 500', 1.10, 'Stationery', 'PAPER', '80gsm white copier paper'],
-    ['Sticky Notes 6pk', 1.50, 'Stationery', 'STICKY', 'Assorted sizes and colours'],
-    ['Highlighter Set 4pk', 1.75, 'Stationery', 'HILITE', 'Chisel tip highlighters'],
-    ['Ring Binder A4', 0.85, 'Stationery', 'BINDER', '2-ring mechanism, durable cover'],
-
-    ['Blank DVDs 10pk', 1.20, 'Media', 'DVD', 'Writeable optical discs'],
-    ['USB Flash Drive 32GB', 1.10, 'Media', 'USB', 'USB 3.0 swivel drive'],
-    ['External HDD 1TB', 3.50, 'Media', 'HDD', 'Powered desktop hard drive'],
-    ['SD Card 64GB', 1.85, 'Media', 'SD', 'Class 10 UHS-I memory card'],
-
-    ['Screen Protector 2pk', 1.55, 'Gadgets', 'GUARD', 'Tempered glass universal size'],
-    ['Phone Stand Foldable', 1.25, 'Gadgets', 'STAND', 'Adjustable aluminium stand'],
-    ['Cable Ties 100pc', 2.30, 'Gadgets', 'TIES', 'Reusable velcro ties'],
-    ['Power Bank 10000mAh', 1.00, 'Gadgets', 'BANK', 'Dual USB output portable charger'],
-
-    ['Desk Fan USB', 2.50, 'Home', 'FAN', 'Quiet 3-speed mini fan'],
-    ['LED Strip 2m', 2.25, 'Home', 'LED', 'RGB with remote control'],
-    ['Air Purifier Mini', 2.75, 'Home', 'PURIFY', 'HEPA filter compact unit'],
-    ['Cable Management Box', 1.00, 'Home', 'BOX', 'Hide power strips and cables'],
-
-    ['Screen Cleaning Kit', 1.50, 'General', 'CLEAN', 'Spray and microfibre cloth'],
-    ['Microfibre Cloths 5pk', 2.00, 'General', 'CLOTH', 'Lint-free cleaning cloths'],
-    ['Precision Screwdriver Set', 1.25, 'General', 'TOOLS', 'Torx and Phillips bits'],
-    ['Storage Box Stackable', 1.75, 'General', 'STORE', 'Clear plastic with lid'],
-  ];
-
-  const insertProduct = db.prepare(
-    'INSERT INTO products (name, price, category, image_url, description) VALUES (?, ?, ?, ?, ?)'
-  );
-  products.forEach(p => insertProduct.run(...p));
-
-  const deals = [
-    [2, 20, 0.60, 'Price Drop', '2025-01-01', '2025-12-31'],
-    [9, 30, 2.45, 'Member Price', '2025-01-01', '2025-12-31'],
-    [14, 15, 1.23, 'Weekly Offer', '2025-01-01', '2025-12-31'],
-    [22, 25, 0.90, 'Price Drop', '2025-01-01', '2025-12-31'],
-    [30, 50, 1.25, 'Half Price', '2025-01-01', '2025-12-31'],
-    [26, 33, 1.04, '3 for 2', '2025-01-01', '2025-12-31'],
-    [5, 20, 1.80, 'Member Price', '2025-01-01', '2025-12-31'],
-    [16, 10, 1.62, 'Price Drop', '2025-01-01', '2025-12-31'],
-  ];
-
-  const insertDeal = db.prepare(
-    'INSERT INTO deals (product_id, discount_percent, deal_price, description, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?)'
-  );
-  deals.forEach(d => insertDeal.run(...d));
-
-  const insertOrder = db.prepare(
-    'INSERT INTO orders (user_id, total, status, order_type, delivery_address, store_location, slot_time, slot_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
-  );
-  const insertItem = db.prepare(
-    'INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)'
-  );
-  const insertReward = db.prepare(
-    'INSERT INTO rewards (user_id, points, type, description, created_at) VALUES (?, ?, ?, ?, ?)'
-  );
-
-  const o1 = insertOrder.run(1, 12.45, 'delivered', 'delivery', '42 Oak Street, London, SW1A 1AA', null, '10:00-12:00', '2025-03-15', '2025-03-15 09:30:00');
-  insertItem.run(o1.lastInsertRowid, 1, 2, 2.00);
-  insertItem.run(o1.lastInsertRowid, 14, 1, 1.45);
-  insertItem.run(o1.lastInsertRowid, 18, 1, 1.10);
-  insertItem.run(o1.lastInsertRowid, 9, 1, 3.50);
-  insertReward.run(1, 12, 'earned', `Order #${o1.lastInsertRowid}`, '2025-03-15 09:30:00');
-
-  const o2 = insertOrder.run(1, 8.75, 'collected', 'collection', null, 'Main Branch', '14:00-16:00', '2025-04-01', '2025-04-01 13:00:00');
-  insertItem.run(o2.lastInsertRowid, 22, 2, 1.20);
-  insertItem.run(o2.lastInsertRowid, 26, 1, 1.55);
-  insertItem.run(o2.lastInsertRowid, 30, 1, 2.50);
-  insertReward.run(1, 8, 'earned', `Order #${o2.lastInsertRowid}`, '2025-04-01 13:00:00');
-
-  console.log('Database seeded successfully!');
-  console.log('Demo login: john@email.com / password123');
+  console.log('empty db — register on the site then fill admin');
 }
 
 seed();</textarea>
@@ -860,7 +866,7 @@ router.post('/', (req, res) => {
     insertItem.run(orderId, item.product_id, item.quantity, item.price);
   });
 
-  const points = Math.floor(total);
+  const points = Math.floor(total); // £1 on the order = 1 point
   db.prepare('UPDATE users SET reward_points = reward_points + ? WHERE id = ?').run(points, user_id);
   db.prepare(
     "INSERT INTO rewards (user_id, points, type, description) VALUES (?, ?, 'earned', ?)"
@@ -874,17 +880,14 @@ module.exports = router;</textarea>
 </div>
 
 <div class="section" id="b-users">
-<h2>Backend: routes/users.js</h2> <span class="changed-tag">CHANGED</span>
-<p>User authentication routes — register and login with <b>plain text passwords</b> (no hashing). Plus reward points endpoints for viewing history and redeeming points.</p>
+<h2>Backend: routes/users.js</h2>
+<p>Sign up / log in. Passwords kept as plain text so the file stays short. Redeem is fixed at 100 points = £10 off.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">backend/routes/users.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="60">// routes/users.js — Registration, login, and reward points
-const express = require('express');
+<textarea readonly rows="52">const express = require('express');
 const router = express.Router();
 const { getDb } = require('../database');
-// NOTE: no bcryptjs — passwords stored as plain text for simplicity
 
-// POST /api/users/register — create a new account
 router.post('/register', (req, res) => {
   const db = getDb();
   const { name, email, password } = req.body;
@@ -915,13 +918,11 @@ router.post('/register', (req, res) => {
   }
 });
 
-// POST /api/users/login — authenticate a user
 router.post('/login', (req, res) => {
   const db = getDb();
   const { email, password } = req.body;
   const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
 
-  // Simple plain text comparison
   if (!user || user.password !== password) {
     return res.status(401).json({ error: 'Invalid email or password' });
   }
@@ -949,19 +950,26 @@ router.get('/:userId/rewards', (req, res) => {
 router.post('/:userId/rewards/redeem', (req, res) => {
   const db = getDb();
   const { points } = req.body;
-  const user = db.prepare('SELECT reward_points FROM users WHERE id = ?').get(parseInt(req.params.userId));
+  const uid = parseInt(req.params.userId, 10);
 
-  if (!user) return res.status(404).json({ error: 'User not found' });
-  if (user.reward_points < points) {
-    return res.status(400).json({ error: 'Not enough points' });
+  if (points !== 100) {
+    return res.status(400).json({ error: 'Redeem exactly 100 points at a time (£10)' });
   }
 
-  db.prepare('UPDATE users SET reward_points = reward_points - ? WHERE id = ?').run(points, parseInt(req.params.userId));
-  db.prepare(
-    "INSERT INTO rewards (user_id, points, type, description) VALUES (?, ?, 'redeemed', 'Redeemed for discount')"
-  ).run(parseInt(req.params.userId), points);
+  const user = db.prepare('SELECT reward_points FROM users WHERE id = ?').get(uid);
 
-  res.json({ message: 'Points redeemed', remaining: user.reward_points - points });
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  if (user.reward_points < 100) {
+    return res.status(400).json({ error: 'Not enough points (need 100 for £10)' });
+  }
+
+  db.prepare('UPDATE users SET reward_points = reward_points - 100 WHERE id = ?').run(uid);
+  db.prepare(
+    "INSERT INTO rewards (user_id, points, type, description) VALUES (?, 100, 'redeemed', '£10 off voucher')"
+  ).run(uid);
+
+  const updated = db.prepare('SELECT reward_points FROM users WHERE id = ?').get(uid);
+  res.json({ message: 'Redeemed', remaining: updated.reward_points });
 });
 
 module.exports = router;</textarea>
@@ -969,8 +977,8 @@ module.exports = router;</textarea>
 </div>
 
 <div class="section" id="b-admin">
-<h2>Backend: routes/admin.js</h2> <span class="new-tag">NEW</span>
-<p>Admin API routes for managing products and orders. Supports adding new products, editing existing ones, deleting products, listing all orders, and updating order status.</p>
+<h2>Backend: routes/admin.js</h2>
+<p>JSON routes for admin screen — add/edit/delete products and change order status.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">backend/routes/admin.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
 <textarea readonly rows="80">// routes/admin.js — Admin dashboard API (products CRUD + order management)
@@ -1096,7 +1104,7 @@ module.exports = router;</textarea>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/package.json</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
 <textarea readonly rows="17">{
-  "name": "catalog-demo-frontend",
+  "name": "shop-frontend",
   "version": "1.0.0",
   "private": true,
   "dependencies": {
@@ -1127,7 +1135,7 @@ module.exports = router;</textarea>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Catalog Demo</title>
+  <title>FreshMart</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#128722;</text></svg>">
 </head>
 <body>
@@ -1205,12 +1213,11 @@ input, select, textarea {
 
 <!-- ==================== FRONTEND CORE ==================== -->
 <div class="section" id="f-app">
-<h2>Frontend: src/App.js</h2> <span class="changed-tag">CHANGED</span>
-<p>Root component. Renders the Navbar, defines all Routes using React Router (including the new Admin route), and includes a footer.</p>
+<h2>Frontend: src/App.js</h2>
+<p>Navbar, routes, footer. Admin route is just another path.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/src/App.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="56">// App.js — Root component with routing
-import { Routes, Route } from 'react-router-dom';
+<textarea readonly rows="54">import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Products from './pages/Products';
@@ -1220,7 +1227,7 @@ import Rewards from './pages/Rewards';
 import Collection from './pages/Collection';
 import Delivery from './pages/Delivery';
 import Login from './pages/Login';
-import Admin from './pages/Admin'; // NEW — admin dashboard page
+import Admin from './pages/Admin';
 import './App.css';
 
 function App() {
@@ -1237,26 +1244,26 @@ function App() {
           <Route path="/collection" element={<Collection />} />
           <Route path="/delivery" element={<Delivery />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/admin" element={<Admin />} /> {/* NEW */}
+          <Route path="/admin" element={<Admin />} />
         </Routes>
       </main>
       <footer className="footer">
         <div className="footer-content">
           <div className="footer-section">
-            <h4>Catalog Demo</h4>
-            <p>Example full-stack coursework project.</p>
+            <h4>FreshMart</h4>
+            <p>Online groceries coursework.</p>
           </div>
           <div className="footer-section">
-            <h4>Quick Links</h4>
+            <h4>Links</h4>
             <p>Products | Deals | Rewards</p>
           </div>
           <div className="footer-section">
             <h4>Contact</h4>
-            <p>support@example.com</p>
+            <p>help@freshmart.local</p>
           </div>
         </div>
         <div className="footer-bottom">
-          <p>&copy; 2025 Demo project. All rights reserved.</p>
+          <p>&copy; 2026 FreshMart</p>
         </div>
       </footer>
     </div>
@@ -2291,15 +2298,15 @@ const UserContext = createContext();
 export function UserProvider({ children }) {
   // Try to restore session from localStorage on first render
   const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('catalogdemo_session');
+    const saved = localStorage.getItem('shop_user');
     return saved ? JSON.parse(saved) : null;
   });
 
   useEffect(() => {
     if (user) {
-      localStorage.setItem('catalogdemo_session', JSON.stringify(user));
+      localStorage.setItem('shop_user', JSON.stringify(user));
     } else {
-      localStorage.removeItem('catalogdemo_session');
+      localStorage.removeItem('shop_user');
     }
   }, [user]);
 
@@ -2319,7 +2326,7 @@ export const useUser = () => useContext(UserContext);</textarea>
 
 <!-- ==================== COMPONENTS ==================== -->
 <div class="section" id="f-navbar">
-<h2>Component: Navbar.js</h2> <span class="changed-tag">CHANGED</span>
+<h2>Component: Navbar.js</h2>
 <p>Navigation bar with logo, page links (including Admin link), basket button with item count badge, and login/logout. Includes a slide-out panel with quantity controls and checkout links for delivery or collection.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/src/components/Navbar.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
@@ -2344,7 +2351,7 @@ function Navbar() {
       <nav className="navbar">
         <div className="navbar-content">
           <Link to="/" className="navbar-logo">
-            &#128722; Catalog<span>Demo</span>
+            &#128722; Fresh<span>Mart</span>
           </Link>
 
           <div className="navbar-links">
@@ -2353,7 +2360,7 @@ function Navbar() {
             <Link to="/deals" className={isActive('/deals')}>Deals</Link>
             {user && <Link to="/order-history" className={isActive('/order-history')}>Orders</Link>}
             {user && <Link to="/rewards" className={isActive('/rewards')}>Rewards</Link>}
-            <Link to="/admin" className={isActive('/admin')}>Admin</Link> {/* NEW */}
+            <Link to="/admin" className={isActive('/admin')}>Admin</Link>
           </div>
 
           <div className="navbar-right">
@@ -2548,9 +2555,9 @@ function Home() {
   return (
     <div>
       <div className="hero">
-        <h1>Welcome to Catalog Demo</h1>
-        <p>Browse the catalog with delivery or pickup checkout flows</p>
-        <Link to="/products" className="hero-btn">Browse catalog</Link>
+        <h1>FreshMart</h1>
+        <p>Delivery or pickup — no card payment on this build</p>
+        <Link to="/products" className="hero-btn">Browse products</Link>
       </div>
 
       <h2 className="section-title">Browse by category</h2>
@@ -2844,7 +2851,7 @@ function OrderHistory() {
           <div className="icon">&#128230;</div>
           <h2>No orders yet</h2>
           <p>Place an order to see history here</p>
-          <Link to="/products">Browse catalog</Link>
+          <Link to="/products">Browse products</Link>
         </div>
       ) : (
         orders.map(order => (
@@ -2891,7 +2898,7 @@ export default OrderHistory;</textarea>
 
 <div class="section" id="p-rewards">
 <h2>Page: Rewards.js</h2>
-<p>Shows the user's loyalty points balance, points value in pounds, a redeem button (when 100+ points), and a full history of earned/redeemed points.</p>
+<p>£1 spent = 1 point. 100 points = £10 off (button posts <code>{ points: 100 }</code> to the API).</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/src/pages/Rewards.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
 <textarea readonly rows="62">// Rewards.js — View loyalty points balance, history, and redeem
@@ -2920,11 +2927,11 @@ function Rewards() {
       .catch(() => setLoading(false));
   }, [user]);
 
-  const handleRedeem = async (points) => {
+  const handleRedeem = async () => {
     const res = await fetch(`${API}/users/${user.id}/rewards/redeem`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ points })
+      body: JSON.stringify({ points: 100 })
     });
 
     if (res.ok) {
@@ -2933,7 +2940,7 @@ function Rewards() {
         ...prev,
         total_points: data.remaining,
         history: [
-          { id: Date.now(), points, type: 'redeemed', description: 'Redeemed for discount', created_at: new Date().toISOString() },
+          { id: Date.now(), points: 100, type: 'redeemed', description: '£10 off voucher', created_at: new Date().toISOString() },
           ...prev.history
         ]
       }));
@@ -2956,20 +2963,21 @@ function Rewards() {
   return (
     <div>
       <div className="rewards-header">
-        <h1>&#127881; Your Rewards</h1>
+        <h1>Rewards</h1>
         <div className="rewards-points">{rewardsData?.total_points || 0}</div>
         <p className="rewards-value">
-          Points worth &pound;{((rewardsData?.total_points || 0) / 100).toFixed(2)} in vouchers
+          About &pound;{((rewardsData?.total_points || 0) / 10).toFixed(2)} value (100 pts = &pound;10)
         </p>
         {rewardsData?.total_points >= 100 && (
           <button
-            onClick={() => handleRedeem(100)}
+            type="button"
+            onClick={handleRedeem}
             style={{
               marginTop: 16, background: '#333', color: '#ffd700',
               padding: '12px 24px', borderRadius: 8, fontWeight: 700, border: 'none', cursor: 'pointer'
             }}
           >
-            Redeem 100 Points (&pound;1.00 off)
+            Use 100 points for &pound;10 off
           </button>
         )}
       </div>
@@ -2978,10 +2986,10 @@ function Rewards() {
 
       {rewardsData?.history?.length === 0 ? (
         <div className="empty-state">
-          <div className="icon">Γ¡É</div>
+          <div className="icon">&#11088;</div>
           <h2>No rewards yet</h2>
           <p>Earn 1 point for every &pound;1 you spend</p>
-          <Link to="/products">Browse catalog</Link>
+          <Link to="/products">Browse products</Link>
         </div>
       ) : (
         rewardsData?.history?.map(item => (
@@ -3009,7 +3017,7 @@ export default Rewards;</textarea>
 </div>
 
 <div class="section" id="p-collection">
-<h2>Page: Collection.js</h2> <span class="changed-tag">CHANGED</span>
+<h2>Page: Collection.js</h2>
 <p>Pickup checkout page. Uses a single branch (no dropdown — just one store). User picks a date and time slot, reviews the order summary, and submits. Success screen shows confirmation and loyalty points.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/src/pages/Collection.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
@@ -3089,7 +3097,7 @@ function Collection() {
         <div className="icon">&#128722;</div>
         <h2>Your basket is empty</h2>
         <p>Add some products before checkout</p>
-        <Link to="/products">Browse catalog</Link>
+        <Link to="/products">Browse products</Link>
       </div>
     );
   }
@@ -3265,7 +3273,7 @@ function Delivery() {
         <div className="icon">&#128722;</div>
         <h2>Your basket is empty</h2>
         <p>Add some products before checkout</p>
-        <Link to="/products">Browse catalog</Link>
+        <Link to="/products">Browse products</Link>
       </div>
     );
   }
@@ -3505,7 +3513,7 @@ export default Login;</textarea>
 </div>
 
 <div class="section" id="p-admin">
-<h2>Page: Admin.js</h2> <span class="new-tag">NEW</span>
+<h2>Page: Admin.js</h2>
 <p>Admin dashboard page. Two tabs: <b>Products</b> (add, edit, delete) and <b>Orders</b> (view all orders, update status). Products are managed via a form and an editable table. Orders display with status dropdown.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/src/pages/Admin.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
@@ -3809,13 +3817,77 @@ export default Admin;</textarea>
   function updateStatus() {
     var text = elEditor.value;
     var lines = text.length === 0 ? 1 : text.split(/\r\n|\r|\n/).length;
-    stLines.textContent = "Lines: " + lines;
-    stChars.textContent = "Characters: " + text.length;
+    var before = text.slice(0, elEditor.selectionStart || 0);
+    var lineNum = before.length === 0 ? 1 : before.split(/\r\n|\r|\n/).length;
+    var lastNl = Math.max(before.lastIndexOf("\n"), before.lastIndexOf("\r"));
+    var col = lastNl < 0 ? before.length + 1 : before.length - lastNl;
+    stLines.textContent = "Ln " + lineNum + ", Col " + col;
+    stChars.textContent = text.length + " chars";
     var t = activeTab();
     if (t) stName.textContent = t.name;
   }
 
   elEditor.addEventListener("input", updateStatus);
+  elEditor.addEventListener("click", updateStatus);
+  elEditor.addEventListener("keyup", updateStatus);
+
+  var elPalette = document.getElementById("cmdPalette");
+  var elCmdInput = document.getElementById("cmdInput");
+  document.getElementById("btnPalette").addEventListener("click", function () {
+    elPalette.classList.add("open");
+    elPalette.setAttribute("aria-hidden", "false");
+    elCmdInput.focus();
+  });
+  document.getElementById("cmdList").addEventListener("click", function (e) {
+    var d = e.target.getAttribute("data-cmd");
+    if (d === "new") document.getElementById("mNew").click();
+    if (d === "save") document.getElementById("mSave").click();
+    if (d === "theme") document.getElementById("btnTheme").click();
+    if (d === "panel") document.getElementById("btnPanel").click();
+    elPalette.classList.remove("open");
+  });
+  elCmdInput.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      elPalette.classList.remove("open");
+      elPalette.setAttribute("aria-hidden", "true");
+    }
+  });
+  elPalette.addEventListener("click", function (e) {
+    if (e.target === elPalette) {
+      elPalette.classList.remove("open");
+      elPalette.setAttribute("aria-hidden", "true");
+    }
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.ctrlKey && e.shiftKey && (e.key === "P" || e.key === "p")) {
+      e.preventDefault();
+      elPalette.classList.toggle("open");
+      if (elPalette.classList.contains("open")) elCmdInput.focus();
+    }
+  });
+
+  var elBottom = document.getElementById("bottomPanel");
+  document.getElementById("btnPanel").addEventListener("click", function () {
+    elBottom.classList.toggle("open");
+  });
+  document.querySelectorAll(".panel-tabs button").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.querySelectorAll(".panel-tabs button").forEach(function (b) { b.classList.remove("on"); });
+      btn.classList.add("on");
+      var p = btn.getAttribute("data-panel");
+      document.getElementById("panelOut").style.display = p === "out" ? "block" : "none";
+      document.getElementById("panelTerm").style.display = p === "term" ? "block" : "none";
+      document.getElementById("panelProb").style.display = p === "prob" ? "block" : "none";
+      if (!elBottom.classList.contains("open")) elBottom.classList.add("open");
+    });
+  });
+
+  document.querySelectorAll("#explorerTree .file").forEach(function (el) {
+    el.addEventListener("click", function () {
+      var c = el.getAttribute("data-crumb") || el.textContent;
+      document.getElementById("breadcrumb").textContent = "SHOP-PROJECT > " + c;
+    });
+  });
 
   document.getElementById("mNew").addEventListener("click", function () {
     newFile();
@@ -3876,8 +3948,8 @@ export default Admin;</textarea>
 
 <script>
 (function () {
-  var GUIDE_TITLE = "Full-Stack Web Dev Tutorial: React, Node.js & SQLite";
-  var PLAIN_TITLE = "Plain Editor";
+  var GUIDE_TITLE = "Shop project — build notes";
+  var PLAIN_TITLE = "Code Studio";
   var tripleWindow = 500;
   var count = 0;
   var timer = null;
