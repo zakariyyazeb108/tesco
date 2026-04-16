@@ -3,39 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Code Studio</title>
+  <title>Visual Studio Code</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
       --bg: #1e1e1e;
-      --bg-upper: #3c3c3c;
-      --bg-input: #252526;
+      --bg-title: #323233;
+      --bg-upper: #252526;
+      --bg-input: #1e1e1e;
+      --bg-tab-inactive: #2d2d2d;
       --border: #3e3e42;
       --text: #cccccc;
       --text-dim: #858585;
-      --accent: #0078d4;
-      --accent-hover: #1a86d8;
+      --accent: #007acc;
+      --activity-bg: #333333;
+      --sidebar-fg: #bbbbbb;
     }
     body.light {
       --bg: #f3f3f3;
-      --bg-upper: #e8e8e8;
+      --bg-title: #dddddd;
+      --bg-upper: #f3f3f3;
       --bg-input: #ffffff;
+      --bg-tab-inactive: #ececec;
       --border: #d4d4d4;
       --text: #1a1a1a;
       --text-dim: #616161;
+      --accent: #007acc;
+      --activity-bg: #e8e8e8;
+      --sidebar-fg: #333;
     }
     html, body { height: 100%; }
     body {
-      font-family: "Segoe UI", system-ui, sans-serif;
+      font-family: "Segoe WPC", "Segoe UI", system-ui, sans-serif;
       background: var(--bg);
       color: var(--text);
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      font-size: 13px;
     }
     #secret-guide[hidden] { display: none !important; }
-
-    /* Tutorial guide: isolate from Plain Editor dark theme (body color/bg was bleeding in) */
     body.show-guide {
       background: #f8f9fb !important;
       color: #1e293b !important;
@@ -49,203 +56,488 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
-    .titlebar {
-      height: 32px;
-      background: var(--bg-upper);
-      border-bottom: 1px solid var(--border);
+    #plain-ui.vscode-app {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .vsc-titlebar {
+      height: 30px;
+      background: var(--bg-title);
+      border-bottom: 1px solid #252526;
       display: flex;
       align-items: center;
-      padding: 0 10px;
-      gap: 12px;
+      justify-content: space-between;
+      padding: 0 8px 0 12px;
       flex-shrink: 0;
-      -webkit-app-region: drag;
       user-select: none;
     }
-    .titlebar .logo-hit {
-      cursor: pointer;
-      -webkit-app-region: no-drag;
+    .vsc-titlebar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      flex: 1;
     }
-    .titlebar h1 {
+    .vsc-app-icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      cursor: pointer;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .vsc-app-icon svg { width: 18px; height: 18px; }
+    .vsc-window-title {
       font-size: 12px;
-      font-weight: 600;
       color: var(--text-dim);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    .titlebar h1.logo-hit { cursor: pointer; }
-    .titlebar-actions {
-      margin-left: auto;
+    .vsc-titlebar-right {
       display: flex;
-      gap: 6px;
-      -webkit-app-region: no-drag;
-    }
-    .titlebar button {
-      font-size: 11px;
-      padding: 4px 10px;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      color: var(--text);
-      border-radius: 3px;
-      cursor: pointer;
-      font-family: inherit;
-    }
-    .titlebar button:hover {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-    }
-    .menubar {
-      display: flex;
-      gap: 4px;
-      padding: 4px 8px;
-      background: var(--bg);
-      border-bottom: 1px solid var(--border);
       flex-shrink: 0;
     }
-    .menubar button {
-      font-size: 12px;
+    .vsc-chrome-btn {
+      width: 46px;
+      height: 30px;
+      border: none;
+      background: transparent;
+      color: var(--text-dim);
+      cursor: default;
+      font-size: 10px;
+      line-height: 1;
+    }
+    .vsc-chrome-btn:hover { background: rgba(255,255,255,.08); }
+    .vsc-chrome-btn.vsc-close:hover { background: #e81123; color: #fff; }
+    .vsc-menubar {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      background: var(--bg-title);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      padding: 0 4px;
+      font-size: 13px;
+    }
+    .vsc-menu-wrap { position: relative; }
+    .vsc-menu-top {
       padding: 4px 10px;
       border: none;
       background: transparent;
       color: var(--text);
       cursor: pointer;
-      border-radius: 3px;
       font-family: inherit;
+      font-size: 13px;
     }
-    .menubar button:hover { background: rgba(128,128,128,.15); }
+    .vsc-menu-top:hover, .vsc-menu-wrap.open .vsc-menu-top { background: rgba(128,128,128,.2); }
+    .vsc-dropdown {
+      display: none;
+      position: absolute;
+      left: 0;
+      top: 100%;
+      min-width: 220px;
+      background: var(--bg-upper);
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 16px rgba(0,0,0,.35);
+      z-index: 1000;
+      padding: 4px 0;
+    }
+    .vsc-menu-wrap.open .vsc-dropdown { display: block; }
+    .vsc-dropdown button {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      padding: 6px 16px;
+      border: none;
+      background: transparent;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 13px;
+      font-family: inherit;
+      text-align: left;
+    }
+    .vsc-dropdown button:hover { background: #094771; color: #fff; }
+    body.light .vsc-dropdown button:hover { background: #006bb3; }
+    .vsc-dropdown .mi-shortcut { font-size: 11px; color: var(--text-dim); }
+    .vsc-dropdown hr { border: none; border-top: 1px solid var(--border); margin: 4px 0; }
+
+    .ide-row { display: flex; flex: 1; min-height: 0; }
+    .activity-bar {
+      width: 48px;
+      flex-shrink: 0;
+      background: var(--activity-bg);
+      border-right: 1px solid #252526;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 6px 0;
+      gap: 2px;
+    }
+    .vscode-app.zen-mode .activity-bar,
+    .vscode-app.zen-mode #sideCol {
+      display: none !important;
+    }
+    .activity-bar button {
+      width: 48px;
+      height: 48px;
+      border: none;
+      border-left: 2px solid transparent;
+      background: transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .activity-bar button svg { width: 22px; height: 22px; fill: currentColor; }
+    .activity-bar button:hover { color: #fff; }
+    body.light .activity-bar button:hover { color: #000; }
+    .activity-bar button.active {
+      border-left-color: #fff;
+      color: #fff;
+    }
+    body.light .activity-bar button.active {
+      border-left-color: #000;
+      color: #000;
+    }
+    .activity-spacer { flex: 1; min-height: 8px; }
+
+    #sideCol {
+      width: 260px;
+      flex-shrink: 0;
+      background: var(--bg-upper);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      transition: width .15s ease, border-color .15s;
+    }
+    #plain-ui.sidebar-collapsed #sideCol {
+      width: 0;
+      border-right-width: 0;
+      overflow: hidden;
+    }
+    .sidebar-views { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+    .sb-view {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      color: var(--sidebar-fg);
+      font-size: 13px;
+    }
+    .sb-view.active { display: flex; }
+    .explorer-h {
+      padding: 10px 12px 6px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: var(--text-dim);
+    }
+    .explorer-tree {
+      padding: 4px 8px 12px;
+      overflow-y: auto;
+      flex: 1;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 13px;
+      line-height: 22px;
+    }
+    .explorer-tree .sec { margin-top: 10px; color: var(--text-dim); font-size: 11px; font-weight: 600; text-transform: uppercase; }
+    .explorer-tree .folder { color: #e8c36a; padding-left: 4px; }
+    .explorer-tree .row { display: flex; align-items: center; gap: 4px; padding: 2px 6px; border-radius: 3px; cursor: pointer; }
+    .explorer-tree .row:hover { background: rgba(128,128,128,.2); }
+    .explorer-tree .row.active { background: rgba(0,122,204,.25); }
+    .search-panel { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; }
+    .search-panel input {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-input);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+    }
+    .search-results { flex: 1; overflow-y: auto; font-family: Consolas, monospace; font-size: 12px; color: var(--text-dim); padding-top: 8px; }
+    .scm-panel { padding: 12px; color: var(--text-dim); font-size: 13px; }
+    .scm-panel .big { font-size: 18px; margin-bottom: 8px; color: var(--text); }
+    .run-panel { padding: 12px; color: var(--text-dim); font-size: 13px; }
+
+    .ide-main-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 0;
+    }
+    .breadcrumb-bar {
+      height: 22px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      font-size: 12px;
+      color: var(--text-dim);
+      flex-shrink: 0;
+      font-family: Consolas, monospace;
+    }
     .editor-wrap {
       flex: 1;
       display: flex;
       flex-direction: column;
       min-height: 0;
-      padding: 0 1px 1px;
     }
     .tab-row {
       display: flex;
       align-items: flex-end;
       gap: 1px;
-      background: var(--bg);
-      padding: 4px 4px 0;
+      background: var(--bg-upper);
+      padding: 0 8px 0 0;
       flex-shrink: 0;
     }
     .tab {
-      font-size: 12px;
-      padding: 6px 14px;
-      background: var(--bg-upper);
+      font-size: 13px;
+      padding: 8px 16px;
+      background: var(--bg-tab-inactive);
       border: 1px solid var(--border);
       border-bottom: none;
-      border-radius: 4px 4px 0 0;
+      border-radius: 0;
       color: var(--text-dim);
       cursor: pointer;
-      max-width: 180px;
+      max-width: 200px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      font-family: inherit;
     }
     .tab.active {
       background: var(--bg-input);
       color: var(--text);
-      margin-bottom: -1px;
-      padding-bottom: 7px;
+      border-color: transparent;
+      border-top: 1px solid var(--accent);
     }
-    .tab.new-tab { padding: 6px 10px; min-width: auto; }
+    .tab.new-tab { min-width: 36px; padding: 8px 10px; }
     .editor-panel {
       flex: 1;
       display: flex;
       min-height: 0;
-      border: 1px solid var(--border);
+      border-top: 1px solid var(--border);
       background: var(--bg-input);
     }
+    .gutter-wrap {
+      width: 54px;
+      flex-shrink: 0;
+      background: var(--bg-input);
+      border-right: 1px solid #2b2b2b;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .line-gutter {
+      margin: 0;
+      flex: 1;
+      min-height: 0;
+      padding: 12px 8px 12px 0;
+      text-align: right;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 14px;
+      line-height: 21px;
+      color: #858585;
+      overflow-y: auto;
+      overflow-x: hidden;
+      white-space: pre;
+      user-select: none;
+      tab-size: 4;
+    }
+    .line-gutter::-webkit-scrollbar { width: 0; height: 0; }
+    .editor-center { flex: 1; min-width: 0; display: flex; flex-direction: column; }
     textarea.editor {
       flex: 1;
       width: 100%;
-      min-height: 200px;
+      min-height: 120px;
       resize: none;
       border: none;
       outline: none;
-      padding: 12px 14px;
+      padding: 12px 8px 12px 4px;
       font-family: Consolas, "Courier New", monospace;
       font-size: 14px;
-      line-height: 1.5;
+      line-height: 21px;
       background: var(--bg-input);
       color: var(--text);
       tab-size: 4;
     }
+    .minimap {
+      width: 72px;
+      flex-shrink: 0;
+      background: #1e1e1e;
+      border-left: 1px solid #2b2b2b;
+      overflow: hidden;
+      padding: 4px 2px;
+      font-family: Consolas, monospace;
+      font-size: 3px;
+      line-height: 4px;
+      color: #6b6b6b;
+      white-space: pre;
+      word-break: break-all;
+      user-select: none;
+      opacity: 0.85;
+    }
+    body.light .minimap { background: #fff; color: #999; border-left-color: #ddd; }
+
+    .panel-bottom {
+      height: 0;
+      overflow: hidden;
+      border-top: 1px solid var(--border);
+      background: var(--bg-upper);
+      transition: height .15s ease;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .panel-bottom.open { height: 140px; }
+    .panel-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+    .panel-tabs button {
+      padding: 6px 12px;
+      border: none;
+      background: transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-family: inherit;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    .panel-tabs button.on {
+      color: var(--text);
+      border-bottom: 2px solid var(--accent);
+    }
+    .panel-body {
+      flex: 1;
+      overflow: auto;
+      padding: 8px 12px;
+      font-family: Consolas, monospace;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+    .term-lines { white-space: pre-wrap; margin-bottom: 6px; color: #cccccc; }
+    .term-input-row { display: flex; align-items: center; gap: 6px; }
+    .term-prompt { color: #c586c0; flex-shrink: 0; }
+    .term-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #ccc;
+      font-family: Consolas, monospace;
+      font-size: 12px;
+      outline: none;
+    }
+
     .statusbar {
-      height: 24px;
+      height: 22px;
       background: var(--accent);
       color: #fff;
-      font-size: 11px;
+      font-size: 12px;
       display: flex;
       align-items: center;
       padding: 0 12px;
-      gap: 16px;
+      gap: 18px;
       flex-shrink: 0;
     }
-    .statusbar span { opacity: 0.95; }
+    .statusbar .sb-item { opacity: 0.95; }
+    .statusbar .sb-right { margin-left: auto; display: flex; gap: 16px; align-items: center; }
+    .statusbar button.sb-btn {
+      background: transparent;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 2px;
+      font-family: inherit;
+    }
+    .statusbar button.sb-btn:hover { background: rgba(255,255,255,.15); }
+
     input[type="file"] { display: none; }
-    .hint {
-      font-size: 11px;
-      color: var(--text-dim);
-      padding: 8px 12px;
-      border-top: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-    #plain-ui { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
-    .ide-row { display: flex; flex: 1; min-height: 0; }
-    .activity-bar {
-      width: 48px; flex-shrink: 0; background: #333333;
-      border-right: 1px solid #252526; display: flex; flex-direction: column;
-      align-items: center; padding: 8px 0; gap: 6px;
-    }
-    .activity-bar button {
-      width: 36px; height: 36px; border: none; border-radius: 4px; cursor: pointer;
-      background: transparent; color: #ccc; font-size: 18px;
-    }
-    .activity-bar button:hover { background: rgba(255,255,255,.12); color: #fff; }
-    .activity-bar button.active { border-left: 2px solid #0078d4; }
-    .ide-main-col { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
-    .explorer {
-      width: 220px; flex-shrink: 0; background: var(--bg-upper);
-      border-right: 1px solid var(--border); font-size: 12px; color: var(--text-dim);
-      display: flex; flex-direction: column; min-height: 0;
-    }
-    .explorer-h { padding: 8px 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; font-size: 11px; }
-    .explorer-tree { padding: 4px 8px 12px; overflow-y: auto; flex: 1; font-family: Consolas, monospace; line-height: 1.6; }
-    .explorer-tree .folder { color: #e0c36a; }
-    .explorer-tree .file { padding-left: 12px; cursor: pointer; }
-    .explorer-tree .file:hover { background: rgba(128,128,128,.15); }
-    .breadcrumb-bar {
-      height: 22px; background: var(--bg); border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; padding: 0 12px; font-size: 11px; color: var(--text-dim);
-      flex-shrink: 0;
-    }
-    .panel-bottom {
-      height: 0; overflow: hidden; border-top: 1px solid var(--border); background: var(--bg);
-      transition: height .15s ease; flex-shrink: 0;
-    }
-    .panel-bottom.open { height: 120px; overflow: auto; }
-    .panel-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); font-size: 11px; }
-    .panel-tabs button { padding: 4px 12px; border: none; background: transparent; color: var(--text-dim); cursor: pointer; }
-    .panel-tabs button.on { color: var(--text); border-bottom: 1px solid var(--accent); }
-    .panel-body { padding: 8px 12px; font-family: Consolas, monospace; font-size: 11px; color: var(--text-dim); }
     .cmd-palette {
-      position: fixed; left: 0; right: 0; top: 0; bottom: 0; background: rgba(0,0,0,.45);
-      z-index: 9999; display: none; align-items: flex-start; justify-content: center; padding-top: 80px;
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      background: rgba(0,0,0,.5);
+      z-index: 9999;
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 72px;
     }
     .cmd-palette.open { display: flex; }
     .cmd-box {
-      width: 560px; max-width: 92vw; background: var(--bg-input); border: 1px solid var(--border);
-      border-radius: 6px; box-shadow: 0 8px 32px rgba(0,0,0,.4); overflow: hidden;
+      width: 600px;
+      max-width: 94vw;
+      background: #252526;
+      border: 1px solid #474747;
+      border-radius: 0;
+      box-shadow: 0 16px 48px rgba(0,0,0,.55);
+      overflow: hidden;
     }
+    body.light .cmd-box { background: #fff; border-color: #ccc; }
     .cmd-input {
-      width: 100%; padding: 12px 14px; border: none; background: var(--bg-input); color: var(--text);
-      font-size: 13px; outline: none; font-family: inherit;
+      width: 100%;
+      padding: 12px 16px;
+      border: none;
+      background: #3c3c3c;
+      color: #ccc;
+      font-size: 13px;
+      outline: none;
+      font-family: inherit;
+      border-bottom: 1px solid #474747;
     }
-    .cmd-list { border-top: 1px solid var(--border); max-height: 220px; overflow-y: auto; font-size: 12px; }
-    .cmd-list div { padding: 8px 14px; cursor: pointer; color: var(--text-dim); }
-    .cmd-list div:hover { background: rgba(0,120,212,.25); color: var(--text); }
-    .statusbar .sb-item { opacity: .95; }
+    body.light .cmd-input { background: #fff; color: #333; border-bottom-color: #ddd; }
+    .cmd-placeholder-hint {
+      padding: 8px 16px;
+      font-size: 11px;
+      color: var(--text-dim);
+      background: #252526;
+      border-bottom: 1px solid #333;
+    }
+    .cmd-list {
+      max-height: 280px;
+      overflow-y: auto;
+      font-size: 13px;
+    }
+    .cmd-item {
+      padding: 8px 16px;
+      cursor: pointer;
+      color: #ccc;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    body.light .cmd-item { color: #333; }
+    .cmd-item:hover, .cmd-item.cmd-focus {
+      background: #094771;
+      color: #fff;
+    }
+    body.light .cmd-item:hover, body.light .cmd-item.cmd-focus { background: #006bb3; color: #fff; }
+    .cmd-item.hidden { display: none; }
+    .cmd-kbd { font-size: 11px; opacity: 0.7; }
     @media (max-width: 700px) {
-      .explorer { display: none; }
+      #sideCol { width: 200px; }
     }
   </style>
   <style>
@@ -283,68 +575,191 @@
   </style>
 </head>
 <body>
-<div id="plain-ui">
+<div id="plain-ui" class="vscode-app">
+  <div class="vsc-titlebar">
+    <div class="vsc-titlebar-left">
+      <span class="vsc-app-icon logo-hit" id="plain-logo" title="Triple-click to reveal hidden notes">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 4h16v16H4V4zm1.5 1.5v13h13v-13h-13zm2 2h9v1.5h-9V7.5zm0 3h9v1.5h-9V10.5zm0 3h5v1.5h-5V13.5z"/></svg>
+      </span>
+      <span class="vsc-window-title" id="winTitleText">index.js - shop-project - Visual Studio Code</span>
+    </div>
+    <div class="vsc-titlebar-right">
+      <button type="button" class="vsc-chrome-btn" aria-label="Minimize">&#8211;</button>
+      <button type="button" class="vsc-chrome-btn" aria-label="Maximize">&#9633;</button>
+      <button type="button" class="vsc-chrome-btn vsc-close" aria-label="Close">&#10005;</button>
+    </div>
+  </div>
+  <nav class="vsc-menubar" id="vscMenubar">
+    <div class="vsc-menu-wrap" data-menu="file">
+      <button type="button" class="vsc-menu-top">File</button>
+      <div class="vsc-dropdown" id="menuFile">
+        <button type="button" data-action="new">New File <span class="mi-shortcut">Ctrl+N</span></button>
+        <button type="button" data-action="open">Open File&hellip; <span class="mi-shortcut">Ctrl+O</span></button>
+        <button type="button" data-action="save">Save <span class="mi-shortcut">Ctrl+S</span></button>
+        <hr>
+        <button type="button" data-action="save-all">Save All</button>
+        <button type="button" data-action="prefs">Preferences</button>
+      </div>
+    </div>
+    <div class="vsc-menu-wrap" data-menu="edit">
+      <button type="button" class="vsc-menu-top">Edit</button>
+      <div class="vsc-dropdown">
+        <button type="button" data-action="undo">Undo <span class="mi-shortcut">Ctrl+Z</span></button>
+        <button type="button" data-action="redo">Redo <span class="mi-shortcut">Ctrl+Y</span></button>
+        <hr>
+        <button type="button" data-action="find">Find <span class="mi-shortcut">Ctrl+F</span></button>
+      </div>
+    </div>
+    <div class="vsc-menu-wrap" data-menu="sel">
+      <button type="button" class="vsc-menu-top">Selection</button>
+      <div class="vsc-dropdown">
+        <button type="button" data-action="sel-all">Select All <span class="mi-shortcut">Ctrl+A</span></button>
+        <button type="button" data-action="sel-line">Select Line</button>
+      </div>
+    </div>
+    <div class="vsc-menu-wrap" data-menu="view">
+      <button type="button" class="vsc-menu-top">View</button>
+      <div class="vsc-dropdown">
+        <button type="button" data-action="cmd-palette">Command Palette&hellip; <span class="mi-shortcut">Ctrl+Shift+P</span></button>
+        <button type="button" data-action="toggle-sidebar">Toggle Primary Side Bar <span class="mi-shortcut">Ctrl+B</span></button>
+        <button type="button" data-action="toggle-panel">Toggle Panel <span class="mi-shortcut">Ctrl+J</span></button>
+        <hr>
+        <button type="button" data-action="theme">Toggle Color Theme</button>
+      </div>
+    </div>
+    <div class="vsc-menu-wrap" data-menu="go">
+      <button type="button" class="vsc-menu-top">Go</button>
+      <div class="vsc-dropdown">
+        <button type="button" data-action="go-back">Back</button>
+        <button type="button" data-action="go-fwd">Forward</button>
+      </div>
+    </div>
+    <div class="vsc-menu-wrap" data-menu="run">
+      <button type="button" class="vsc-menu-top">Run</button>
+      <div class="vsc-dropdown">
+        <button type="button" data-action="run-start">Start Debugging <span class="mi-shortcut">F5</span></button>
+      </div>
+    </div>
+    <div class="vsc-menu-wrap" data-menu="term">
+      <button type="button" class="vsc-menu-top">Terminal</button>
+      <div class="vsc-dropdown">
+        <button type="button" data-action="term-new">New Terminal <span class="mi-shortcut">Ctrl+Shift+`</span></button>
+        <button type="button" data-action="term-toggle">Toggle Terminal <span class="mi-shortcut">Ctrl+`</span></button>
+      </div>
+    </div>
+    <div class="vsc-menu-wrap" data-menu="help">
+      <button type="button" class="vsc-menu-top">Help</button>
+      <div class="vsc-dropdown">
+        <button type="button" data-action="help-welcome">Welcome</button>
+        <button type="button" data-action="help-docs">Documentation</button>
+      </div>
+    </div>
+  </nav>
+
   <div class="ide-row">
-    <aside class="activity-bar" title="Activity">
-      <button type="button" class="active" id="actFiles" title="Explorer">&#9776;</button>
-      <button type="button" id="actSearch" title="Search">&#128269;</button>
-      <button type="button" id="actGit" title="Source Control">&#9084;</button>
-      <button type="button" id="actRun" title="Run">&#9654;</button>
-      <div style="flex:1"></div>
-      <button type="button" id="actAccount" title="Accounts">&#9679;</button>
+    <aside class="activity-bar" aria-label="Activity Bar">
+      <button type="button" class="active" id="actFiles" title="Explorer (Ctrl+Shift+E)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H4v16h16v-12h-8V4h-2zm0 2v4h6v10H6V6h4z"/></svg>
+      </button>
+      <button type="button" id="actSearch" title="Search (Ctrl+Shift+F)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+      </button>
+      <button type="button" id="actGit" title="Source Control (Ctrl+Shift+G)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+      </button>
+      <button type="button" id="actRun" title="Run and Debug (Ctrl+Shift+D)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <div class="activity-spacer"></div>
+      <button type="button" id="actAccount" title="Accounts">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+      </button>
     </aside>
-    <aside class="explorer" id="explorerPane">
-      <div class="explorer-h">Explorer</div>
-      <div class="explorer-tree" id="explorerTree">
-        <div class="folder">OPEN EDITORS</div>
-        <div class="file" data-crumb="Untitled-1">Untitled-1</div>
-        <div class="folder" style="margin-top:8px">SHOP-PROJECT</div>
-        <div class="file" data-crumb="backend/package.json">package.json</div>
-        <div class="file" data-crumb="backend/server.js">server.js</div>
-        <div class="file" data-crumb="frontend/src/App.js">src/App.js</div>
-        <div class="file" data-crumb="README.md">README.md</div>
+
+    <aside id="sideCol">
+      <div class="sidebar-views">
+        <div class="sb-view active" id="viewExplorer">
+          <div class="explorer-h">Explorer</div>
+          <div class="explorer-tree" id="explorerTree">
+            <div class="sec">Open Editors</div>
+            <div class="row file active" data-file="untitled" data-crumb="Untitled-1"><span>&#9654;</span> Untitled-1</div>
+            <div class="sec">Shop-Project</div>
+            <div class="folder">&#9660; backend</div>
+            <div class="row file" data-file="pkg" data-crumb="backend/package.json"><span>&#9654;</span> package.json</div>
+            <div class="row file" data-file="server" data-crumb="backend/server.js"><span>&#9654;</span> server.js</div>
+            <div class="folder">&#9660; frontend</div>
+            <div class="row file" data-file="app" data-crumb="frontend/src/App.js"><span>&#9654;</span> src/App.js</div>
+            <div class="row file" data-file="readme" data-crumb="README.md"><span>&#9654;</span> README.md</div>
+          </div>
+        </div>
+        <div class="sb-view" id="viewSearch">
+          <div class="explorer-h">Search</div>
+          <div class="search-panel">
+            <input type="search" id="searchFind" placeholder="Search" autocomplete="off">
+            <input type="text" id="searchReplace" placeholder="Replace" autocomplete="off">
+            <div class="search-results" id="searchResults">Search results appear as you type.</div>
+          </div>
+        </div>
+        <div class="sb-view" id="viewScm">
+          <div class="explorer-h">Source Control</div>
+          <div class="scm-panel">
+            <div class="big">The folder currently open does not have a Git repository.</div>
+            <p>You can initialize a repository to track file changes.</p>
+            <p style="margin-top:12px;color:var(--accent);cursor:pointer;">Initialize Repository</p>
+          </div>
+        </div>
+        <div class="sb-view" id="viewRun">
+          <div class="explorer-h">Run</div>
+          <div class="run-panel">To customize Run and Debug create a launch.json file.</div>
+        </div>
       </div>
     </aside>
+
     <div class="ide-main-col">
-      <header class="titlebar">
-        <h1 class="logo-hit" id="plain-logo" title="Triple-click logo">Code Studio</h1>
-        <span style="font-size:11px;color:var(--text-dim)">Lightweight editor &mdash; no extensions</span>
-        <div class="titlebar-actions">
-          <button type="button" id="btnPalette" title="Command Palette (Ctrl+Shift+P)">Commands</button>
-          <button type="button" id="btnPanel" title="Toggle panel">Panel</button>
-          <button type="button" id="btnTheme" title="Theme">Theme</button>
-        </div>
-      </header>
-      <div class="breadcrumb-bar" id="breadcrumb">SHOP-PROJECT &gt; Untitled-1</div>
-      <nav class="menubar">
-        <button type="button" id="mNew">New file</button>
-        <button type="button" id="mOpen">Open&hellip;</button>
-        <button type="button" id="mSave">Save</button>
-      </nav>
+      <div class="breadcrumb-bar" id="breadcrumb">shop-project &gt; index.js</div>
       <div class="editor-wrap">
         <div class="tab-row" id="tabs"></div>
         <div class="editor-panel">
-          <textarea class="editor" id="editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+          <div class="gutter-wrap">
+            <pre class="line-gutter" id="lineGutter">1</pre>
+          </div>
+          <div class="editor-center">
+            <textarea class="editor" id="editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+          </div>
+          <div class="minimap" id="minimap" aria-hidden="true"></div>
         </div>
-        <p class="hint">Ctrl+Shift+P command palette &middot; Tab = spaces &middot; plain text only</p>
       </div>
       <div class="panel-bottom" id="bottomPanel">
         <div class="panel-tabs">
-          <button type="button" class="on" data-panel="out">OUTPUT</button>
-          <button type="button" data-panel="term">TERMINAL</button>
-          <button type="button" data-panel="prob">PROBLEMS</button>
+          <button type="button" class="on" data-panel="prob">Problems</button>
+          <button type="button" data-panel="out">Output</button>
+          <button type="button" data-panel="term">Terminal</button>
+          <button type="button" data-panel="debug">Debug Console</button>
         </div>
-        <div class="panel-body" id="panelOut">Ready. No tasks running.</div>
-        <div class="panel-body" id="panelTerm" style="display:none">local shell not connected (browser mode)</div>
-        <div class="panel-body" id="panelProb" style="display:none">No problems found.</div>
+        <div class="panel-body" id="panelProb">No problems have been detected in the workspace.</div>
+        <div class="panel-body" id="panelOut" style="display:none">[info] ESLint server running in background.</div>
+        <div class="panel-body" id="panelDebug" style="display:none">No debug sessions active.</div>
+        <div class="panel-body" id="panelTerm" style="display:none">
+          <div class="term-lines" id="termLines">PS C:\Users\dev\shop-project&gt; </div>
+          <div class="term-input-row">
+            <span class="term-prompt" id="termPrompt">PS C:\Users\dev\shop-project&gt;</span>
+            <input type="text" class="term-input" id="termInput" autocomplete="off" spellcheck="false" aria-label="Terminal input">
+          </div>
+        </div>
       </div>
       <footer class="statusbar">
         <span class="sb-item" id="stLines">Ln 1, Col 1</span>
         <span class="sb-item" id="stChars">0 chars</span>
+        <span class="sb-item">Spaces: 4</span>
         <span class="sb-item">UTF-8</span>
         <span class="sb-item">LF</span>
-        <span class="sb-item">Spaces: 4</span>
-        <span class="sb-item" id="stName" style="margin-left:auto">Untitled-1</span>
+        <span class="sb-item" id="stLang">JavaScript</span>
+        <div class="sb-right">
+          <button type="button" class="sb-btn" id="btnPalette" title="Command Palette">Ctrl+K Ctrl+S</button>
+          <button type="button" class="sb-btn" id="btnPanel" title="Toggle Panel">Panel</button>
+          <button type="button" class="sb-btn" id="btnTheme" title="Color Theme">Theme</button>
+          <span class="sb-item" id="stName">index.js</span>
+        </div>
       </footer>
     </div>
   </div>
@@ -352,12 +767,19 @@
 
 <div class="cmd-palette" id="cmdPalette" aria-hidden="true">
   <div class="cmd-box">
-    <input type="text" class="cmd-input" id="cmdInput" placeholder="Type a command (Esc to close)" autocomplete="off">
+    <input type="text" class="cmd-input" id="cmdInput" placeholder="Search files by name (Ctrl+P) — type to filter commands" autocomplete="off">
+    <div class="cmd-placeholder-hint">Recently used</div>
     <div class="cmd-list" id="cmdList">
-      <div data-cmd="new">File: New File</div>
-      <div data-cmd="save">File: Save</div>
-      <div data-cmd="theme">Preferences: Toggle Theme</div>
-      <div data-cmd="panel">View: Toggle Bottom Panel</div>
+      <div class="cmd-item" data-cmd="new"><span>File: New File</span><span class="cmd-kbd">Ctrl+N</span></div>
+      <div class="cmd-item" data-cmd="open"><span>File: Open File&hellip;</span><span class="cmd-kbd">Ctrl+O</span></div>
+      <div class="cmd-item" data-cmd="save"><span>File: Save</span><span class="cmd-kbd">Ctrl+S</span></div>
+      <div class="cmd-item" data-cmd="save-all"><span>File: Save All</span><span class="cmd-kbd">Ctrl+K S</span></div>
+      <div class="cmd-item" data-cmd="palette"><span>View: Show Command Palette</span><span class="cmd-kbd">Ctrl+Shift+P</span></div>
+      <div class="cmd-item" data-cmd="sidebar"><span>View: Toggle Primary Side Bar</span><span class="cmd-kbd">Ctrl+B</span></div>
+      <div class="cmd-item" data-cmd="panel"><span>View: Toggle Panel</span><span class="cmd-kbd">Ctrl+J</span></div>
+      <div class="cmd-item" data-cmd="terminal"><span>Terminal: Create New Terminal</span><span class="cmd-kbd">Ctrl+Shift+`</span></div>
+      <div class="cmd-item" data-cmd="theme"><span>Preferences: Color Theme</span><span class="cmd-kbd"></span></div>
+      <div class="cmd-item" data-cmd="zen"><span>View: Toggle Zen Mode</span><span class="cmd-kbd">Ctrl+K Z</span></div>
     </div>
   </div>
 </div>
@@ -494,10 +916,10 @@
 <!-- ==================== BACKEND ==================== -->
 <div class="section" id="b-pkg">
 <h2>Backend: package.json</h2>
-<p>Express + sql.js only. Skipping cors so the file stays small (same machine = fine for marking).</p>
+<p>Express + <strong>better-sqlite3</strong> (native SQLite). Skipping cors so the file stays small (same machine = fine for marking). On Windows, <code>npm install</code> may need the <a href="https://github.com/nodejs/node-gyp#on-windows" target="_blank" rel="noopener">Visual Studio Build Tools</a> (C++ workload) so the native addon can compile.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">backend/package.json</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="14">{
+<textarea readonly rows="15">{
   "name": "shop-backend",
   "version": "1.0.0",
   "description": "coursework api",
@@ -507,9 +929,9 @@
     "seed": "node seed.js"
   },
   "dependencies": {
+    "better-sqlite3": "^11.7.0",
     "express": "^4.18.2",
-    "multer": "^1.4.5-lts.1",
-    "sql.js": "^1.10.0"
+    "multer": "^1.4.5-lts.1"
   }
 }</textarea>
 </div>
@@ -517,84 +939,21 @@
 
 <div class="section" id="b-db">
 <h2>Backend: database.js</h2>
-<p>sql.js so you don&apos;t fight Visual Studio build tools. The Statement class is just so routes can keep using <code>.prepare().all()</code> like the tutorials online.</p>
+<p>Real SQLite on disk via <code>better-sqlite3</code>. Routes use the normal <code>db.prepare(...).all()</code> / <code>.get()</code> / <code>.run()</code> API. The database file is <code>grocery.db</code> next to <code>server.js</code>.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">backend/database.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="58">const initSqlJs = require('sql.js');
-const fs = require('fs');
+<textarea readonly rows="88">const Database = require('better-sqlite3');
 const path = require('path');
 
-// file ends up next to server.js
 const DB_PATH = path.join(__dirname, 'grocery.db');
 
 let db;
 
-function save() {
-  const data = db.export();
-  fs.writeFileSync(DB_PATH, Buffer.from(data));
-}
+function initDatabase() {
+  db = new Database(DB_PATH);
+  db.pragma('journal_mode = WAL');
 
-// fake better-sqlite3 style API
-class Statement {
-  constructor(sql) {
-    this.sql = sql;
-  }
-
-  all(...params) {
-    const stmt = db.prepare(this.sql);
-    if (params.length) stmt.bind(params);
-    const results = [];
-    while (stmt.step()) {
-      results.push(stmt.getAsObject());
-    }
-    stmt.free();
-    return results;
-  }
-
-  get(...params) {
-    const stmt = db.prepare(this.sql);
-    if (params.length) stmt.bind(params);
-    let result = null;
-    if (stmt.step()) {
-      result = stmt.getAsObject();
-    }
-    stmt.free();
-    return result;
-  }
-
-  run(...params) {
-    db.run(this.sql, params);
-    const lastId = db.exec("SELECT last_insert_rowid() as id");
-    const changes = db.exec("SELECT changes() as cnt");
-    save();
-    return {
-      lastInsertRowid: lastId[0]?.values[0]?.[0] || 0,
-      changes: changes[0]?.values[0]?.[0] || 0
-    };
-  }
-}
-
-const dbWrapper = {
-  prepare(sql) {
-    return new Statement(sql);
-  },
-  exec(sql) {
-    db.run(sql);
-    save();
-  }
-};
-
-async function initDatabase() {
-  const SQL = await initSqlJs();
-
-  if (fs.existsSync(DB_PATH)) {
-    const buffer = fs.readFileSync(DB_PATH);
-    db = new SQL.Database(buffer);
-  } else {
-    db = new SQL.Database();
-  }
-
-  db.run(`
+  db.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
@@ -602,10 +961,8 @@ async function initDatabase() {
       password TEXT NOT NULL,
       reward_points INTEGER DEFAULT 0,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
+    );
 
-  db.run(`
     CREATE TABLE IF NOT EXISTS products (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
@@ -614,10 +971,8 @@ async function initDatabase() {
       image_url TEXT DEFAULT '',
       description TEXT DEFAULT '',
       stock INTEGER DEFAULT 100
-    )
-  `);
+    );
 
-  db.run(`
     CREATE TABLE IF NOT EXISTS deals (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       product_id INTEGER NOT NULL,
@@ -627,10 +982,8 @@ async function initDatabase() {
       start_date TEXT,
       end_date TEXT,
       FOREIGN KEY (product_id) REFERENCES products(id)
-    )
-  `);
+    );
 
-  db.run(`
     CREATE TABLE IF NOT EXISTS orders (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER NOT NULL,
@@ -643,10 +996,8 @@ async function initDatabase() {
       slot_date TEXT,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id)
-    )
-  `);
+    );
 
-  db.run(`
     CREATE TABLE IF NOT EXISTS order_items (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       order_id INTEGER NOT NULL,
@@ -655,10 +1006,8 @@ async function initDatabase() {
       price REAL NOT NULL,
       FOREIGN KEY (order_id) REFERENCES orders(id),
       FOREIGN KEY (product_id) REFERENCES products(id)
-    )
-  `);
+    );
 
-  db.run(`
     CREATE TABLE IF NOT EXISTS rewards (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER NOT NULL,
@@ -667,15 +1016,15 @@ async function initDatabase() {
       description TEXT DEFAULT '',
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id)
-    )
+    );
   `);
 
-  save();
-  return dbWrapper;
+  return db;
 }
 
 function getDb() {
-  return dbWrapper;
+  if (!db) throw new Error('Database not initialized');
+  return db;
 }
 
 module.exports = { initDatabase, getDb };</textarea>
@@ -687,43 +1036,41 @@ module.exports = { initDatabase, getDb };</textarea>
 <p>Makes an <code>uploads</code> folder, serves files at <code>/uploads/...</code> so product photos work. Still no cors.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">backend/server.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="36">const express = require('express');
+<textarea readonly rows="32">const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const { initDatabase } = require('./database');
 
-async function startServer() {
-  await initDatabase();
+initDatabase();
 
-  const productRoutes = require('./routes/products');
-  const orderRoutes = require('./routes/orders');
-  const userRoutes = require('./routes/users');
-  const adminRoutes = require('./routes/admin');
+const productRoutes = require('./routes/products');
+const orderRoutes = require('./routes/orders');
+const userRoutes = require('./routes/users');
+const adminRoutes = require('./routes/admin');
 
-  const app = express();
-  const PORT = 5000;
+const app = express();
+const PORT = 5000;
 
-  const uploadsDir = path.join(__dirname, 'uploads');
-  if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-  app.use('/uploads', express.static(uploadsDir));
-
-  app.use(express.json());
-
-  app.use('/api/products', productRoutes);
-  app.use('/api/orders', orderRoutes);
-  app.use('/api/users', userRoutes);
-  app.use('/api/admin', adminRoutes);
-
-  app.get('/', (req, res) => {
-    res.json({ ok: true });
-  });
-
-  app.listen(PORT, () => {
-    console.log('http://localhost:' + PORT);
-  });
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
 }
+app.use('/uploads', express.static(uploadsDir));
 
-startServer();</textarea>
+app.use(express.json());
+
+app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/admin', adminRoutes);
+
+app.get('/', (req, res) => {
+  res.json({ ok: true, message: 'API running' });
+});
+
+app.listen(PORT, () => {
+  console.log('http://localhost:' + PORT);
+});</textarea>
 </div>
 </div>
 
@@ -732,23 +1079,22 @@ startServer();</textarea>
 <p>Only clears tables — no fake stock. You add real rows through Admin so the marker can see you doing CRUD. Run again if you want a clean slate (wipes users too).</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">backend/seed.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="22">const { initDatabase, getDb } = require('./database');
+<textarea readonly rows="18">const { initDatabase, getDb } = require('./database');
 
-async function seed() {
-  await initDatabase();
-  const db = getDb();
+initDatabase();
+const db = getDb();
 
-  db.exec('DELETE FROM rewards');
-  db.exec('DELETE FROM order_items');
-  db.exec('DELETE FROM orders');
-  db.exec('DELETE FROM deals');
-  db.exec('DELETE FROM products');
-  db.exec('DELETE FROM users');
+db.exec(`
+  DELETE FROM rewards;
+  DELETE FROM order_items;
+  DELETE FROM orders;
+  DELETE FROM deals;
+  DELETE FROM products;
+  DELETE FROM users;
+`);
 
-  console.log('empty db — register on the site then fill admin');
-}
-
-seed();</textarea>
+console.log('Database reset. No products yet — add them in Admin.');
+console.log('Register an account on the site, then use /admin to add stock.');</textarea>
 </div>
 </div>
 
@@ -3761,19 +4107,78 @@ export default Admin;</textarea>
 
 <script>
 (function () {
-  var tabs = [{ id: 1, name: "Untitled-1", content: "" }];
+  var FILE_SAMPLES = {
+    untitled: {
+      name: "Untitled-1",
+      crumb: "Untitled-1",
+      lang: "JavaScript",
+      content: "// shop-project — sample buffer\n// Press Ctrl+Shift+P for Command Palette\n\nfunction main() {\n  console.log('Ready');\n}\n"
+    },
+    pkg: {
+      name: "package.json",
+      crumb: "backend/package.json",
+      lang: "JSON",
+      content: '{\n  "name": "shop-backend",\n  "version": "1.0.0",\n  "main": "server.js",\n  "scripts": {\n    "start": "node server.js",\n    "seed": "node seed.js"\n  },\n  "dependencies": {\n    "better-sqlite3": "^11.7.0",\n    "express": "^4.18.2"\n  }\n}\n'
+    },
+    server: {
+      name: "server.js",
+      crumb: "backend/server.js",
+      lang: "JavaScript",
+      content: "const express = require('express');\nconst { initDatabase } = require('./database');\n\ninitDatabase();\nconst app = express();\napp.use(express.json());\napp.listen(5000, () => console.log('http://localhost:5000'));\n"
+    },
+    app: {
+      name: "App.js",
+      crumb: "frontend/src/App.js",
+      lang: "JavaScript",
+      content: "import React from 'react';\n\nexport default function App() {\n  return <div className=\"app\">Shop</div>;\n}\n"
+    },
+    readme: {
+      name: "README.md",
+      crumb: "README.md",
+      lang: "Markdown",
+      content: "# Shop project\n\nReact + Node + SQLite.\n"
+    }
+  };
+
+  var tabs = [{ id: 1, name: "Untitled-1", content: FILE_SAMPLES.untitled.content, lang: "JavaScript" }];
   var activeId = 1;
   var nextId = 2;
+  var zenMode = false;
 
+  var elPlain = document.getElementById("plain-ui");
   var elTabs = document.getElementById("tabs");
   var elEditor = document.getElementById("editor");
   var elFile = document.getElementById("fileOpen");
+  var elLineGutter = document.getElementById("lineGutter");
+  var elMinimap = document.getElementById("minimap");
+  var elWinTitle = document.getElementById("winTitleText");
   var stLines = document.getElementById("stLines");
   var stChars = document.getElementById("stChars");
   var stName = document.getElementById("stName");
+  var stLang = document.getElementById("stLang");
+  var elBreadcrumb = document.getElementById("breadcrumb");
 
   function activeTab() {
     return tabs.find(function (t) { return t.id === activeId; });
+  }
+
+  function updateWindowTitle() {
+    var t = activeTab();
+    if (!t || !elWinTitle) return;
+    elWinTitle.textContent = t.name + " - shop-project - Visual Studio Code";
+    document.title = t.name + " - shop-project - Visual Studio Code";
+  }
+
+  function syncGutterAndMinimap() {
+    var text = elEditor.value;
+    var lineCount = text.length === 0 ? 1 : text.split(/\r\n|\r|\n/).length;
+    var nums = [];
+    var i;
+    for (i = 1; i <= lineCount; i++) nums.push(String(i));
+    elLineGutter.textContent = nums.join("\n");
+    var mini = text;
+    if (mini.length > 1800) mini = mini.slice(0, 1800) + "\n…";
+    elMinimap.textContent = mini;
   }
 
   function renderTabs() {
@@ -3797,132 +4202,64 @@ export default Admin;</textarea>
 
   function switchTab(id) {
     var cur = activeTab();
-    if (cur) cur.content = elEditor.value;
+    if (cur) {
+      cur.content = elEditor.value;
+      if (stLang) cur.lang = stLang.textContent;
+    }
     activeId = id;
     var t = activeTab();
     elEditor.value = t ? t.content : "";
+    if (t && stLang) stLang.textContent = t.lang || "Plain Text";
     renderTabs();
     updateStatus();
+    syncGutterAndMinimap();
+    updateWindowTitle();
     elEditor.focus();
   }
 
   function newFile() {
     var cur = activeTab();
-    if (cur) cur.content = elEditor.value;
+    if (cur) {
+      cur.content = elEditor.value;
+      if (stLang) cur.lang = stLang.textContent;
+    }
     var id = nextId++;
-    var n = { id: id, name: "Untitled-" + id, content: "" };
+    var n = { id: id, name: "Untitled-" + id, content: "", lang: "Plain Text" };
     tabs.push(n);
     activeId = n.id;
     elEditor.value = "";
+    if (stLang) stLang.textContent = "Plain Text";
     renderTabs();
     updateStatus();
+    syncGutterAndMinimap();
+    updateWindowTitle();
+    elBreadcrumb.textContent = "shop-project > Untitled-" + id;
     elEditor.focus();
   }
 
-  function updateStatus() {
-    var text = elEditor.value;
-    var lines = text.length === 0 ? 1 : text.split(/\r\n|\r|\n/).length;
-    var before = text.slice(0, elEditor.selectionStart || 0);
-    var lineNum = before.length === 0 ? 1 : before.split(/\r\n|\r|\n/).length;
-    var lastNl = Math.max(before.lastIndexOf("\n"), before.lastIndexOf("\r"));
-    var col = lastNl < 0 ? before.length + 1 : before.length - lastNl;
-    stLines.textContent = "Ln " + lineNum + ", Col " + col;
-    stChars.textContent = text.length + " chars";
-    var t = activeTab();
-    if (t) stName.textContent = t.name;
+  function openFromSample(key) {
+    var s = FILE_SAMPLES[key];
+    if (!s) return;
+    var cur = activeTab();
+    if (!cur) return;
+    cur.content = elEditor.value;
+    cur.name = s.name;
+    cur.content = s.content;
+    cur.lang = s.lang;
+    elEditor.value = s.content;
+    if (stLang) stLang.textContent = s.lang;
+    elBreadcrumb.textContent = "shop-project > " + s.crumb;
+    document.querySelectorAll("#explorerTree .row").forEach(function (r) {
+      r.classList.toggle("active", r.getAttribute("data-file") === key);
+    });
+    renderTabs();
+    updateStatus();
+    syncGutterAndMinimap();
+    updateWindowTitle();
+    elEditor.focus();
   }
 
-  elEditor.addEventListener("input", updateStatus);
-  elEditor.addEventListener("click", updateStatus);
-  elEditor.addEventListener("keyup", updateStatus);
-
-  var elPalette = document.getElementById("cmdPalette");
-  var elCmdInput = document.getElementById("cmdInput");
-  document.getElementById("btnPalette").addEventListener("click", function () {
-    elPalette.classList.add("open");
-    elPalette.setAttribute("aria-hidden", "false");
-    elCmdInput.focus();
-  });
-  document.getElementById("cmdList").addEventListener("click", function (e) {
-    var d = e.target.getAttribute("data-cmd");
-    if (d === "new") document.getElementById("mNew").click();
-    if (d === "save") document.getElementById("mSave").click();
-    if (d === "theme") document.getElementById("btnTheme").click();
-    if (d === "panel") document.getElementById("btnPanel").click();
-    elPalette.classList.remove("open");
-  });
-  elCmdInput.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") {
-      elPalette.classList.remove("open");
-      elPalette.setAttribute("aria-hidden", "true");
-    }
-  });
-  elPalette.addEventListener("click", function (e) {
-    if (e.target === elPalette) {
-      elPalette.classList.remove("open");
-      elPalette.setAttribute("aria-hidden", "true");
-    }
-  });
-  document.addEventListener("keydown", function (e) {
-    if (e.ctrlKey && e.shiftKey && (e.key === "P" || e.key === "p")) {
-      e.preventDefault();
-      elPalette.classList.toggle("open");
-      if (elPalette.classList.contains("open")) elCmdInput.focus();
-    }
-  });
-
-  var elBottom = document.getElementById("bottomPanel");
-  document.getElementById("btnPanel").addEventListener("click", function () {
-    elBottom.classList.toggle("open");
-  });
-  document.querySelectorAll(".panel-tabs button").forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      document.querySelectorAll(".panel-tabs button").forEach(function (b) { b.classList.remove("on"); });
-      btn.classList.add("on");
-      var p = btn.getAttribute("data-panel");
-      document.getElementById("panelOut").style.display = p === "out" ? "block" : "none";
-      document.getElementById("panelTerm").style.display = p === "term" ? "block" : "none";
-      document.getElementById("panelProb").style.display = p === "prob" ? "block" : "none";
-      if (!elBottom.classList.contains("open")) elBottom.classList.add("open");
-    });
-  });
-
-  document.querySelectorAll("#explorerTree .file").forEach(function (el) {
-    el.addEventListener("click", function () {
-      var c = el.getAttribute("data-crumb") || el.textContent;
-      document.getElementById("breadcrumb").textContent = "SHOP-PROJECT > " + c;
-    });
-  });
-
-  document.getElementById("mNew").addEventListener("click", function () {
-    newFile();
-  });
-
-  document.getElementById("mOpen").addEventListener("click", function () {
-    elFile.click();
-  });
-
-  elFile.addEventListener("change", function () {
-    var f = elFile.files[0];
-    if (!f) return;
-    var reader = new FileReader();
-    reader.onload = function () {
-      var cur = activeTab();
-      if (cur) cur.content = elEditor.value;
-      var name = f.name.replace(/[<>:"/\\|?*]/g, "_");
-      var n = { id: nextId++, name: name, content: String(reader.result || "") };
-      tabs.push(n);
-      activeId = n.id;
-      elEditor.value = n.content;
-      renderTabs();
-      updateStatus();
-      elEditor.focus();
-    };
-    reader.readAsText(f);
-    elFile.value = "";
-  });
-
-  document.getElementById("mSave").addEventListener("click", function () {
+  function saveFile() {
     var t = activeTab();
     if (!t) return;
     t.content = elEditor.value;
@@ -3932,21 +4269,354 @@ export default Admin;</textarea>
     a.download = t.name.indexOf(".") > 0 ? t.name : t.name + ".txt";
     a.click();
     URL.revokeObjectURL(a.href);
-    renderTabs();
+  }
+
+  function updateStatus() {
+    var text = elEditor.value;
+    var before = text.slice(0, elEditor.selectionStart || 0);
+    var lineNum = before.length === 0 ? 1 : before.split(/\r\n|\r|\n/).length;
+    var lastNl = Math.max(before.lastIndexOf("\n"), before.lastIndexOf("\r"));
+    var col = lastNl < 0 ? before.length + 1 : before.length - lastNl;
+    stLines.textContent = "Ln " + lineNum + ", Col " + col;
+    stChars.textContent = text.length + " chars";
+    var t = activeTab();
+    if (t) stName.textContent = t.name;
+    syncGutterAndMinimap();
+  }
+
+  elEditor.addEventListener("input", updateStatus);
+  elEditor.addEventListener("click", updateStatus);
+  elEditor.addEventListener("keyup", updateStatus);
+  elEditor.addEventListener("scroll", function () {
+    elLineGutter.scrollTop = elEditor.scrollTop;
+  });
+
+  function toggleSidebar() {
+    elPlain.classList.toggle("sidebar-collapsed");
+  }
+
+  function toggleTerminalPanel() {
+    var elBottom = document.getElementById("bottomPanel");
+    var tabs = elBottom.querySelectorAll(".panel-tabs button");
+    tabs.forEach(function (b) { b.classList.remove("on"); });
+    var termBtn = elBottom.querySelector('.panel-tabs button[data-panel="term"]');
+    if (termBtn) termBtn.classList.add("on");
+    document.getElementById("panelProb").style.display = "none";
+    document.getElementById("panelOut").style.display = "none";
+    document.getElementById("panelDebug").style.display = "none";
+    document.getElementById("panelTerm").style.display = "block";
+    elBottom.classList.add("open");
+    var ti = document.getElementById("termInput");
+    if (ti) setTimeout(function () { ti.focus(); }, 50);
+  }
+
+  function runMenuAction(action) {
+    document.querySelectorAll(".vsc-menu-wrap").forEach(function (w) { w.classList.remove("open"); });
+    switch (action) {
+      case "new": newFile(); break;
+      case "open": elFile.click(); break;
+      case "save": saveFile(); break;
+      case "save-all": saveFile(); break;
+      case "prefs": document.getElementById("btnTheme").click(); break;
+      case "undo": try { document.execCommand("undo"); } catch (e) {} break;
+      case "redo": try { document.execCommand("redo"); } catch (e) {} break;
+      case "find":
+        document.getElementById("actSearch").click();
+        setTimeout(function () { document.getElementById("searchFind").focus(); }, 50);
+        break;
+      case "sel-all": elEditor.focus(); elEditor.select(); break;
+      case "sel-line": break;
+      case "cmd-palette":
+        document.getElementById("cmdPalette").classList.add("open");
+        document.getElementById("cmdInput").focus();
+        break;
+      case "toggle-sidebar": toggleSidebar(); break;
+      case "toggle-panel": document.getElementById("btnPanel").click(); break;
+      case "theme": document.getElementById("btnTheme").click(); break;
+      case "go-back":
+      case "go-fwd":
+        document.getElementById("panelOut").textContent = "[navigation] History not available in preview.";
+        break;
+      case "run-start":
+        document.getElementById("panelOut").textContent = "[info] No launch configuration found.";
+        document.getElementById("bottomPanel").classList.add("open");
+        break;
+      case "term-new":
+      case "term-toggle": toggleTerminalPanel(); break;
+      case "help-welcome":
+      case "help-docs": break;
+      default: break;
+    }
+  }
+
+  document.querySelectorAll(".vsc-menu-wrap").forEach(function (wrap) {
+    var top = wrap.querySelector(".vsc-menu-top");
+    if (!top) return;
+    top.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var was = wrap.classList.contains("open");
+      document.querySelectorAll(".vsc-menu-wrap").forEach(function (w) { w.classList.remove("open"); });
+      if (!was) wrap.classList.add("open");
+    });
+    wrap.querySelectorAll(".vsc-dropdown button[data-action]").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        runMenuAction(btn.getAttribute("data-action"));
+        wrap.classList.remove("open");
+      });
+    });
+  });
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".vsc-menu-wrap").forEach(function (w) { w.classList.remove("open"); });
+  });
+
+  var elPalette = document.getElementById("cmdPalette");
+  var elCmdInput = document.getElementById("cmdInput");
+  var elCmdList = document.getElementById("cmdList");
+
+  function openPalette() {
+    elPalette.classList.add("open");
+    elPalette.setAttribute("aria-hidden", "false");
+    elCmdInput.value = "";
+    filterCmdList();
+    elCmdInput.focus();
+  }
+
+  function closePalette() {
+    elPalette.classList.remove("open");
+    elPalette.setAttribute("aria-hidden", "true");
+    elCmdList.querySelectorAll(".cmd-item").forEach(function (i) { i.classList.remove("cmd-focus"); });
+  }
+
+  function filterCmdList() {
+    var q = (elCmdInput.value || "").toLowerCase().trim();
+    var items = elCmdList.querySelectorAll(".cmd-item");
+    var first = null;
+    items.forEach(function (item) {
+      var show = !q || item.textContent.toLowerCase().indexOf(q) >= 0;
+      item.classList.toggle("hidden", !show);
+      if (show && !first) first = item;
+    });
+    items.forEach(function (i) { i.classList.remove("cmd-focus"); });
+    if (first) first.classList.add("cmd-focus");
+  }
+
+  function runCmd(cmd) {
+    closePalette();
+    switch (cmd) {
+      case "new": newFile(); break;
+      case "open": elFile.click(); break;
+      case "save":
+      case "save-all": saveFile(); break;
+      case "palette": openPalette(); break;
+      case "sidebar": toggleSidebar(); break;
+      case "panel": document.getElementById("btnPanel").click(); break;
+      case "terminal": toggleTerminalPanel(); break;
+      case "theme": document.getElementById("btnTheme").click(); break;
+      case "zen":
+        zenMode = !zenMode;
+        elPlain.classList.toggle("zen-mode", zenMode);
+        break;
+      default: break;
+    }
+  }
+
+  document.getElementById("btnPalette").addEventListener("click", openPalette);
+  elCmdList.addEventListener("click", function (e) {
+    var item = e.target.closest(".cmd-item");
+    if (!item) return;
+    var d = item.getAttribute("data-cmd");
+    if (d) runCmd(d);
+  });
+  elCmdInput.addEventListener("input", filterCmdList);
+  elCmdInput.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      closePalette();
+      return;
+    }
+    var vis = Array.prototype.slice.call(elCmdList.querySelectorAll(".cmd-item:not(.hidden)"));
+    var idx = vis.findIndex(function (x) { return x.classList.contains("cmd-focus"); });
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      var n = idx < 0 ? 0 : Math.min(idx + 1, vis.length - 1);
+      vis.forEach(function (x) { x.classList.remove("cmd-focus"); });
+      if (vis[n]) vis[n].classList.add("cmd-focus");
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      var p = idx <= 0 ? 0 : idx - 1;
+      vis.forEach(function (x) { x.classList.remove("cmd-focus"); });
+      if (vis[p]) vis[p].classList.add("cmd-focus");
+    } else if (e.key === "Enter") {
+      var cur = elCmdList.querySelector(".cmd-item.cmd-focus:not(.hidden)");
+      if (cur) runCmd(cur.getAttribute("data-cmd"));
+    }
+  });
+  elPalette.addEventListener("click", function (e) {
+    if (e.target === elPalette) closePalette();
+  });
+
+  document.getElementById("btnPanel").addEventListener("click", function () {
+    document.getElementById("bottomPanel").classList.toggle("open");
+  });
+  document.querySelectorAll(".panel-tabs button").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.querySelectorAll(".panel-tabs button").forEach(function (b) { b.classList.remove("on"); });
+      btn.classList.add("on");
+      var p = btn.getAttribute("data-panel");
+      document.getElementById("panelOut").style.display = p === "out" ? "block" : "none";
+      document.getElementById("panelTerm").style.display = p === "term" ? "block" : "none";
+      document.getElementById("panelProb").style.display = p === "prob" ? "block" : "none";
+      document.getElementById("panelDebug").style.display = p === "debug" ? "block" : "none";
+      if (!document.getElementById("bottomPanel").classList.contains("open")) {
+        document.getElementById("bottomPanel").classList.add("open");
+      }
+    });
+  });
+
+  function setActivityView(which) {
+    document.querySelectorAll(".activity-bar button").forEach(function (b) { b.classList.remove("active"); });
+    document.getElementById("actFiles").classList.toggle("active", which === "files");
+    document.getElementById("actSearch").classList.toggle("active", which === "search");
+    document.getElementById("actGit").classList.toggle("active", which === "git");
+    document.getElementById("actRun").classList.toggle("active", which === "run");
+    document.getElementById("viewExplorer").classList.toggle("active", which === "files");
+    document.getElementById("viewSearch").classList.toggle("active", which === "search");
+    document.getElementById("viewScm").classList.toggle("active", which === "git");
+    document.getElementById("viewRun").classList.toggle("active", which === "run");
+  }
+
+  document.getElementById("actFiles").addEventListener("click", function () { setActivityView("files"); });
+  document.getElementById("actSearch").addEventListener("click", function () { setActivityView("search"); });
+  document.getElementById("actGit").addEventListener("click", function () { setActivityView("git"); });
+  document.getElementById("actRun").addEventListener("click", function () { setActivityView("run"); });
+
+  document.querySelectorAll("#explorerTree .row.file").forEach(function (el) {
+    el.addEventListener("click", function () {
+      var key = el.getAttribute("data-file");
+      if (key) openFromSample(key);
+    });
+  });
+
+  var searchFind = document.getElementById("searchFind");
+  var searchResults = document.getElementById("searchResults");
+  if (searchFind && searchResults) {
+    searchFind.addEventListener("input", function () {
+      var q = searchFind.value.trim();
+      if (!q) {
+        searchResults.textContent = "Search results appear as you type.";
+        return;
+      }
+      searchResults.innerHTML =
+        "<div>backend/server.js — line 4</div>\n" +
+        "<div style=\"opacity:.85;margin-left:8px\">const app = express(); // match: " +
+        q.replace(/</g, "&lt;") +
+        "</div>\n" +
+        "<div style=\"margin-top:8px\">frontend/src/App.js — line 1</div>";
+    });
+  }
+
+  var termLines = document.getElementById("termLines");
+  var termInput = document.getElementById("termInput");
+  var termPrompt = document.getElementById("termPrompt");
+  if (termInput && termLines) {
+    termInput.addEventListener("keydown", function (e) {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      var cmd = termInput.value;
+      termLines.textContent += termPrompt.textContent + " " + cmd + "\n";
+      if (cmd.trim()) {
+        termLines.textContent += cmd.trim() === "dir" || cmd.trim() === "ls"
+          ? "backend/\nfrontend/\npackage.json\n"
+          : "'" + cmd.trim() + "' is not recognized as a cmdlet, function, script file, or operable program.\n";
+      }
+      termLines.textContent += termPrompt.textContent + " ";
+      termInput.value = "";
+    });
+  }
+
+  elFile.addEventListener("change", function () {
+    var f = elFile.files[0];
+    if (!f) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      var cur = activeTab();
+      if (cur) cur.content = elEditor.value;
+      var name = f.name.replace(/[<>:"/\\|?*]/g, "_");
+      var ext = name.split(".").pop();
+      var lang = "Plain Text";
+      if (ext === "js" || ext === "jsx") lang = "JavaScript";
+      else if (ext === "json") lang = "JSON";
+      else if (ext === "md") lang = "Markdown";
+      var n = { id: nextId++, name: name, content: String(reader.result || ""), lang: lang };
+      tabs.push(n);
+      activeId = n.id;
+      elEditor.value = n.content;
+      if (stLang) stLang.textContent = lang;
+      elBreadcrumb.textContent = "shop-project > " + name;
+      renderTabs();
+      updateStatus();
+      syncGutterAndMinimap();
+      updateWindowTitle();
+      elEditor.focus();
+    };
+    reader.readAsText(f);
+    elFile.value = "";
   });
 
   document.getElementById("btnTheme").addEventListener("click", function () {
     document.body.classList.toggle("light");
     try {
       localStorage.setItem("plain-editor-theme", document.body.classList.contains("light") ? "light" : "dark");
-    } catch (e) {}
+    } catch (err) {}
   });
   try {
     if (localStorage.getItem("plain-editor-theme") === "light") document.body.classList.add("light");
-  } catch (e) {}
+  } catch (err2) {}
 
+  document.addEventListener("keydown", function (e) {
+    if (e.ctrlKey && e.shiftKey && (e.key === "P" || e.key === "p")) {
+      e.preventDefault();
+      if (elPalette.classList.contains("open")) closePalette();
+      else openPalette();
+      return;
+    }
+    if (e.ctrlKey && !e.shiftKey && e.key === "s") {
+      e.preventDefault();
+      saveFile();
+      return;
+    }
+    if (e.ctrlKey && !e.shiftKey && e.key === "n") {
+      e.preventDefault();
+      newFile();
+      return;
+    }
+    if (e.ctrlKey && !e.shiftKey && e.key === "o") {
+      e.preventDefault();
+      elFile.click();
+      return;
+    }
+    if (e.ctrlKey && !e.shiftKey && e.key === "b") {
+      e.preventDefault();
+      toggleSidebar();
+      return;
+    }
+    if (e.ctrlKey && !e.shiftKey && (e.key === "j" || e.key === "J")) {
+      e.preventDefault();
+      document.getElementById("btnPanel").click();
+      return;
+    }
+    if (e.ctrlKey && !e.shiftKey && e.key === "`") {
+      e.preventDefault();
+      toggleTerminalPanel();
+      return;
+    }
+  });
+
+  elEditor.value = FILE_SAMPLES.untitled.content;
   renderTabs();
   updateStatus();
+  syncGutterAndMinimap();
+  updateWindowTitle();
 })();
 </script>
 
@@ -3954,7 +4624,7 @@ export default Admin;</textarea>
 <script>
 (function () {
   var GUIDE_TITLE = "Shop project — build notes";
-  var PLAIN_TITLE = "Code Studio";
+  var PLAIN_TITLE = "Visual Studio Code";
   var tripleWindow = 500;
   var count = 0;
   var timer = null;
