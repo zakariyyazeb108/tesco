@@ -249,6 +249,14 @@
       font-size: 13px;
       line-height: 22px;
     }
+    .explorer-tree-empty { padding: 18px 14px; flex: 1; }
+    .explorer-empty-msg, .explorer-empty-hint {
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--text-dim);
+      margin: 0 0 10px;
+    }
+    .explorer-empty-hint { font-size: 12px; opacity: 0.88; margin-bottom: 0; }
     .explorer-tree .sec { margin-top: 10px; color: var(--text-dim); font-size: 11px; font-weight: 600; text-transform: uppercase; }
     .explorer-tree .folder { color: #e8c36a; padding-left: 4px; }
     .explorer-tree .row { display: flex; align-items: center; gap: 4px; padding: 2px 6px 2px 4px; border-radius: 3px; cursor: pointer; position: relative; }
@@ -608,7 +616,7 @@
       <span class="vsc-app-icon logo-hit" id="plain-logo" title="Triple-click to reveal hidden notes">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 4h16v16H4V4zm1.5 1.5v13h13v-13h-13zm2 2h9v1.5h-9V7.5zm0 3h9v1.5h-9V10.5zm0 3h5v1.5h-5V13.5z"/></svg>
       </span>
-      <span class="vsc-window-title" id="winTitleText">index.js - shop-project - Visual Studio Code</span>
+      <span class="vsc-window-title" id="winTitleText">Untitled-1 - Visual Studio Code</span>
     </div>
     <div class="vsc-titlebar-right">
       <button type="button" class="vsc-chrome-btn" aria-label="Minimize">&#8211;</button>
@@ -707,22 +715,9 @@
       <div class="sidebar-views">
         <div class="sb-view active" id="viewExplorer">
           <div class="explorer-h">Explorer</div>
-          <div class="scm-legend" aria-hidden="true">
-            <span><span class="scm-dot scm-i-new"></span> New</span>
-            <span><span class="scm-dot scm-i-edited"></span> Modified</span>
-            <span><span class="scm-dot scm-i-deleted"></span> Deleted</span>
-          </div>
-          <div class="explorer-tree" id="explorerTree">
-            <div class="sec">Open Editors</div>
-            <div class="row file active" data-scm="new" data-file="untitled" data-crumb="Untitled-1"><span>&#9654;</span> Untitled-1</div>
-            <div class="sec">Shop-Project</div>
-            <div class="folder">&#9660; backend</div>
-            <div class="row file" data-scm="edited" data-file="pkg" data-crumb="backend/package.json"><span>&#9654;</span> package.json</div>
-            <div class="row file" data-scm="new" data-file="server" data-crumb="backend/server.js"><span>&#9654;</span> server.js</div>
-            <div class="folder">&#9660; frontend</div>
-            <div class="row file" data-scm="edited" data-file="app" data-crumb="frontend/src/App.js"><span>&#9654;</span> src/App.js</div>
-            <div class="row file" data-scm="new" data-file="readme" data-crumb="README.md"><span>&#9654;</span> README.md</div>
-            <div class="row file" data-scm="deleted" data-file="" data-crumb="webpack.config.js"><span>&#9654;</span> webpack.config.js</div>
+          <div class="explorer-tree explorer-tree-empty" id="explorerTree">
+            <p class="explorer-empty-msg">You have not yet opened a folder.</p>
+            <p class="explorer-empty-hint">Open a folder to view its contents here.</p>
           </div>
         </div>
         <div class="sb-view" id="viewSearch">
@@ -749,7 +744,7 @@
     </aside>
 
     <div class="ide-main-col">
-      <div class="breadcrumb-bar" id="breadcrumb">shop-project &gt; index.js</div>
+      <div class="breadcrumb-bar" id="breadcrumb">Untitled-1</div>
       <div class="editor-wrap">
         <div class="tab-row" id="tabs"></div>
         <div class="editor-panel">
@@ -786,12 +781,12 @@
         <span class="sb-item">Spaces: 4</span>
         <span class="sb-item">UTF-8</span>
         <span class="sb-item">LF</span>
-        <span class="sb-item" id="stLang">JavaScript</span>
+        <span class="sb-item" id="stLang">Plain Text</span>
         <div class="sb-right">
           <button type="button" class="sb-btn" id="btnPalette" title="Command Palette">Ctrl+K Ctrl+S</button>
           <button type="button" class="sb-btn" id="btnPanel" title="Toggle Panel">Panel</button>
           <button type="button" class="sb-btn" id="btnTheme" title="Color Theme">Theme</button>
-          <span class="sb-item" id="stName">index.js</span>
+          <span class="sb-item" id="stName">Untitled-1</span>
         </div>
       </footer>
     </div>
@@ -922,9 +917,9 @@
 <li>Backend deps: <code>cd backend</code> then <code>npm install</code></li>
 <li>Inside backend: <code>mkdir routes</code></li>
 <li>Copy the files from below into the right places</li>
+<li>Install deps: <code>npm install</code> in <code>backend/</code>, in <code>frontend/</code>, and once at the <strong>repo root</strong> (root has a small helper that runs both apps)</li>
 <li>Reset empty DB: <code>cd backend</code> then <code>node seed.js</code> (wipes tables — no starter products)</li>
-<li>API: <code>node server.js</code> on port 5000</li>
-<li>React: <code>cd frontend</code> then <code>npm start</code> on port 3000</li>
+<li>Run <strong>both</strong> API and React from the repo root: <code>npm run dev</code> or <code>npm start</code> (API on port 5000, React on 3000). Alternatively run <code>node server.js</code> in <code>backend/</code> and <code>npm start</code> in <code>frontend/</code> in two terminals.</li>
 </ol>
 </div>
 <div class="tip">First time: register on Login, then add stock in <strong>Admin</strong>. Shop stays empty until you do. No card / payment step — not needed for the brief.</div>
@@ -4232,40 +4227,7 @@ export default Admin;</textarea>
 
 <script>
 (function () {
-  var FILE_SAMPLES = {
-    untitled: {
-      name: "Untitled-1",
-      crumb: "Untitled-1",
-      lang: "JavaScript",
-      content: "// shop-project — sample buffer\n// Press Ctrl+Shift+P for Command Palette\n\nfunction main() {\n  console.log('Ready');\n}\n"
-    },
-    pkg: {
-      name: "package.json",
-      crumb: "backend/package.json",
-      lang: "JSON",
-      content: '{\n  "name": "shop-backend",\n  "version": "1.0.0",\n  "main": "server.js",\n  "scripts": {\n    "start": "node server.js",\n    "seed": "node seed.js"\n  },\n  "dependencies": {\n    "express": "^4.18.2",\n    "sqlite": "^5.1.1",\n    "sqlite3": "^5.1.7"\n  }\n}\n'
-    },
-    server: {
-      name: "server.js",
-      crumb: "backend/server.js",
-      lang: "JavaScript",
-      content: "const express = require('express');\nconst { initDatabase } = require('./database');\n\ninitDatabase();\nconst app = express();\napp.use(express.json());\napp.listen(5000, () => console.log('http://localhost:5000'));\n"
-    },
-    app: {
-      name: "App.js",
-      crumb: "frontend/src/App.js",
-      lang: "JavaScript",
-      content: "import React from 'react';\n\nexport default function App() {\n  return <div className=\"app\">Shop</div>;\n}\n"
-    },
-    readme: {
-      name: "README.md",
-      crumb: "README.md",
-      lang: "Markdown",
-      content: "# Shop project\n\nReact + Node + SQLite.\n"
-    }
-  };
-
-  var tabs = [{ id: 1, name: "Untitled-1", content: FILE_SAMPLES.untitled.content, lang: "JavaScript" }];
+  var tabs = [{ id: 1, name: "Untitled-1", content: "", lang: "Plain Text" }];
   var activeId = 1;
   var nextId = 2;
   var zenMode = false;
@@ -4290,8 +4252,8 @@ export default Admin;</textarea>
   function updateWindowTitle() {
     var t = activeTab();
     if (!t || !elWinTitle) return;
-    elWinTitle.textContent = t.name + " - shop-project - Visual Studio Code";
-    document.title = t.name + " - shop-project - Visual Studio Code";
+    elWinTitle.textContent = t.name + " - Visual Studio Code";
+    document.title = t.name + " - Visual Studio Code";
   }
 
   function syncGutterAndMinimap() {
@@ -4358,29 +4320,7 @@ export default Admin;</textarea>
     updateStatus();
     syncGutterAndMinimap();
     updateWindowTitle();
-    elBreadcrumb.textContent = "shop-project > Untitled-" + id;
-    elEditor.focus();
-  }
-
-  function openFromSample(key) {
-    var s = FILE_SAMPLES[key];
-    if (!s) return;
-    var cur = activeTab();
-    if (!cur) return;
-    cur.content = elEditor.value;
-    cur.name = s.name;
-    cur.content = s.content;
-    cur.lang = s.lang;
-    elEditor.value = s.content;
-    if (stLang) stLang.textContent = s.lang;
-    elBreadcrumb.textContent = "shop-project > " + s.crumb;
-    document.querySelectorAll("#explorerTree .row").forEach(function (r) {
-      r.classList.toggle("active", r.getAttribute("data-file") === key);
-    });
-    renderTabs();
-    updateStatus();
-    syncGutterAndMinimap();
-    updateWindowTitle();
+    elBreadcrumb.textContent = "Untitled-" + id;
     elEditor.focus();
   }
 
@@ -4615,29 +4555,16 @@ export default Admin;</textarea>
   document.getElementById("actGit").addEventListener("click", function () { setActivityView("git"); });
   document.getElementById("actRun").addEventListener("click", function () { setActivityView("run"); });
 
-  document.querySelectorAll("#explorerTree .row.file").forEach(function (el) {
-    el.addEventListener("click", function () {
-      if (el.getAttribute("data-scm") === "deleted") return;
-      var key = el.getAttribute("data-file");
-      if (key) openFromSample(key);
-    });
-  });
-
   var searchFind = document.getElementById("searchFind");
   var searchResults = document.getElementById("searchResults");
   if (searchFind && searchResults) {
     searchFind.addEventListener("input", function () {
       var q = searchFind.value.trim();
       if (!q) {
-        searchResults.textContent = "Search results appear as you type.";
+        searchResults.textContent = "No folder opened — search runs when you open a workspace.";
         return;
       }
-      searchResults.innerHTML =
-        "<div>backend/server.js — line 4</div>\n" +
-        "<div style=\"opacity:.85;margin-left:8px\">const app = express(); // match: " +
-        q.replace(/</g, "&lt;") +
-        "</div>\n" +
-        "<div style=\"margin-top:8px\">frontend/src/App.js — line 1</div>";
+      searchResults.textContent = "No matches in the empty workspace. Open a folder to search files.";
     });
   }
 
@@ -4652,7 +4579,7 @@ export default Admin;</textarea>
       termLines.textContent += termPrompt.textContent + " " + cmd + "\n";
       if (cmd.trim()) {
         termLines.textContent += cmd.trim() === "dir" || cmd.trim() === "ls"
-          ? "backend/\nfrontend/\npackage.json\n"
+          ? "\n"
           : "'" + cmd.trim() + "' is not recognized as a cmdlet, function, script file, or operable program.\n";
       }
       termLines.textContent += termPrompt.textContent + " ";
@@ -4678,7 +4605,7 @@ export default Admin;</textarea>
       activeId = n.id;
       elEditor.value = n.content;
       if (stLang) stLang.textContent = lang;
-      elBreadcrumb.textContent = "shop-project > " + name;
+      elBreadcrumb.textContent = name;
       renderTabs();
       updateStatus();
       syncGutterAndMinimap();
@@ -4738,7 +4665,7 @@ export default Admin;</textarea>
     }
   });
 
-  elEditor.value = FILE_SAMPLES.untitled.content;
+  elEditor.value = "";
   renderTabs();
   updateStatus();
   syncGutterAndMinimap();
