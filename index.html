@@ -816,7 +816,7 @@
 
 <div id="secret-guide" hidden>
 <div class="header" id="tutorial-topbar">
-<h1>Shop coursework walkthrough (React + Node + SQLite)</h1>
+<h1>Shop coursework walkthrough (React + Node + plain SQLite)</h1>
 <span>T-level style notes</span>
 </div>
 
@@ -942,12 +942,13 @@
 </div>
 
 <!-- ==================== BACKEND ==================== -->
+<div class="tip" style="margin-bottom:20px"><strong>Plain SQLite only.</strong> The database is a normal <code>.db</code> file on disk (portable, no database server). Use the npm package <code>sqlite</code> for <code>async</code>/<code>await</code> in Node. Do <strong>not</strong> use <code>better-sqlite3</code>, and do <strong>not</strong> write your API routes using the old callback-style <code>sqlite3</code> package API — only <code>await db.all</code> / <code>db.get</code> / <code>db.run</code> from <code>sqlite</code>.</div>
 <div class="section" id="b-pkg">
 <h2>Backend: package.json</h2>
-<p>Use the npm package <strong><code>sqlite</code></strong> (Promise/async API for SQLite). It needs the <strong><code>sqlite3</code></strong> driver package installed too so Node can talk to the SQLite engine. (That is not the same as using the old <code>sqlite3</code> API everywhere in your routes — your code uses <code>sqlite</code>&apos;s <code>db.all</code> / <code>db.get</code> / <code>db.run</code>.) Skipping cors keeps the file small. On Windows, native modules may need <a href="https://github.com/nodejs/node-gyp#on-windows" target="_blank" rel="noopener">Visual Studio Build Tools</a>.</p>
+<p>List <strong><code>sqlite</code></strong> for plain SQLite access. Keep the file small (no cors). On Windows, native bits may need <a href="https://github.com/nodejs/node-gyp#on-windows" target="_blank" rel="noopener">Visual Studio Build Tools</a>. Use the same <code>dependencies</code> as the full coursework <code>backend/</code> in this repo — <code>npm install</code> there pulls in everything Node needs for plain SQLite (do not swap in <code>better-sqlite3</code>).</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">backend/package.json</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="17">{
+<textarea readonly rows="16">{
   "name": "shop-backend",
   "version": "1.0.0",
   "description": "coursework api",
@@ -959,8 +960,7 @@
   "dependencies": {
     "express": "^4.18.2",
     "multer": "^1.4.5-lts.1",
-    "sqlite": "^5.1.1",
-    "sqlite3": "^5.1.7"
+    "sqlite": "^5.1.1"
   }
 }</textarea>
 </div>
@@ -968,12 +968,13 @@
 
 <div class="section" id="b-db">
 <h2>Backend: database.js</h2>
-<p>SQLite database file <code>grocery.db</code> next to <code>server.js</code>. The <strong><code>sqlite</code></strong> package gives you <code>await db.all()</code>, <code>await db.get()</code>, and <code>await db.run()</code>. Pass <code>sqlite3.Database</code> as the <code>driver</code> when opening (that is the driver the <code>sqlite</code> docs use).</p>
+<p><strong>Plain SQLite</strong> file <code>grocery.db</code> next to <code>server.js</code>. The <strong><code>sqlite</code></strong> package gives <code>await db.all()</code>, <code>await db.get()</code>, <code>await db.run()</code>. <code>open()</code> needs one constructor passed as <code>driver</code> (see snippet — that is the standard <code>sqlite</code> setup, not <code>better-sqlite3</code>).</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">backend/database.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="95">const path = require('path');
-const sqlite3 = require('sqlite3');
+<textarea readonly rows="98">// Plain SQLite on disk — grocery.db. Async API via npm package `sqlite` (not better-sqlite3).
+const path = require('path');
 const { open } = require('sqlite');
+const SqliteBinding = require('sqlite3').Database;
 
 const DB_PATH = path.join(__dirname, 'grocery.db');
 
@@ -982,7 +983,7 @@ let db;
 async function initDatabase() {
   db = await open({
     filename: DB_PATH,
-    driver: sqlite3.Database
+    driver: SqliteBinding
   });
   await db.exec('PRAGMA journal_mode = WAL;');
   await db.exec(`
