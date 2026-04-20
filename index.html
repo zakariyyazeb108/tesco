@@ -913,13 +913,13 @@
 <div class="step-box">
 <ol>
 <li>Make folders: <code>mkdir backend</code> and <code>mkdir frontend</code></li>
-<li>React app: <code>cd frontend</code> then <code>npx create-react-app .</code> (or copy a package.json and run <code>npm install</code>)</li>
+<li>React app: set up your React frontend inside <code>frontend/</code>, then run <code>npm install</code> there so the app dependencies are ready.</li>
 <li>Backend deps: <code>cd backend</code> then <code>npm install</code></li>
 <li>Inside backend: <code>mkdir routes</code></li>
 <li>Copy the files from below into the right places</li>
 <li>Install deps: <code>npm install</code> in <code>backend/</code>, in <code>frontend/</code>, and once at the <strong>repo root</strong> (root has a small helper that runs both apps)</li>
 <li>Reset empty DB: <code>cd backend</code> then <code>node seed.js</code> (wipes tables — no starter products)</li>
-<li>Run <strong>both</strong> API and React from the repo root: <code>npm run dev</code> or <code>npm start</code> (API on port 5000, React on 3000). Alternatively run <code>node server.js</code> in <code>backend/</code> and <code>npm start</code> in <code>frontend/</code> in two terminals.</li>
+<li>Run <strong>both</strong> API and React from the repo root: <code>npm run dev</code> or <code>npm start</code> (API on port 5000, React on 3000). Alternatively run <code>node server.js</code> in <code>backend/</code> and the frontend dev command from <code>frontend/package.json</code> in two terminals.</li>
 </ol>
 </div>
 <div class="tip">First time: register on Login, then add stock in <strong>Admin</strong>. Shop stays empty until you do. No card / payment step — not needed for the brief.</div>
@@ -934,7 +934,7 @@
 <li><code>vagrant up</code> — first boot installs Node via the provision script.</li>
 <li><code>vagrant ssh</code> then <code>cd /vagrant</code> (project is mounted there).</li>
 <li>Ports 5000 and 3000 are forwarded to your Windows machine — open <code>http://localhost:3000</code> in Edge/Chrome on the host.</li>
-<li>Inside the VM: <code>cd backend &amp;&amp; npm install &amp;&amp; node seed.js &amp;&amp; node server.js</code> in one terminal, and <code>cd frontend &amp;&amp; npm install &amp;&amp; npm start</code> in another (or use <code>screen</code>/<code>tmux</code>).</li>
+<li>Inside the VM: <code>cd backend &amp;&amp; npm install &amp;&amp; node seed.js &amp;&amp; node server.js</code> in one terminal, and <code>cd frontend &amp;&amp; npm install</code> then run your frontend dev command in another (or use <code>screen</code>/<code>tmux</code>).</li>
 <li>If the React dev server binds only to localhost inside the VM, that still works with Vagrant port forwarding.</li>
 </ol>
 </div>
@@ -942,10 +942,10 @@
 </div>
 
 <!-- ==================== BACKEND ==================== -->
-<div class="tip" style="margin-bottom:20px"><strong>Plain SQLite only.</strong> The database is a normal <code>.db</code> file on disk (portable, no database server). Use the npm package <code>sqlite</code> for <code>async</code>/<code>await</code> in Node. Do <strong>not</strong> use <code>better-sqlite3</code>, and do <strong>not</strong> write your API routes using the old callback-style <code>sqlite3</code> package API — only <code>await db.all</code> / <code>db.get</code> / <code>db.run</code> from <code>sqlite</code>.</div>
+<div class="tip" style="margin-bottom:20px"><strong>SQLite only.</strong> The database is a normal <code>.db</code> file on disk (portable, no database server). This project uses <strong><code>sql.js</code></strong> — the SQLite engine compiled to WebAssembly — plus a small <code>await db.all</code> / <code>db.get</code> / <code>db.run</code> wrapper so routes stay async.</div>
 <div class="section" id="b-pkg">
 <h2>Backend: package.json</h2>
-<p>List <strong><code>sqlite</code></strong> for plain SQLite access. Keep the file small (no cors). On Windows, native bits may need <a href="https://github.com/nodejs/node-gyp#on-windows" target="_blank" rel="noopener">Visual Studio Build Tools</a>. Use the same <code>dependencies</code> as the full coursework <code>backend/</code> in this repo — <code>npm install</code> there pulls in everything Node needs for plain SQLite (do not swap in <code>better-sqlite3</code>).</p>
+<p>List <strong><code>sql.js</code></strong> for SQLite in pure JavaScript (WASM) — no native compiler or extra database driver. Keep the file small (no cors). Use the same <code>dependencies</code> as the coursework <code>backend/</code> in this repo — <code>npm install</code> there pulls in everything you need.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">backend/package.json</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
 <textarea readonly rows="16">{
@@ -960,7 +960,7 @@
   "dependencies": {
     "express": "^4.18.2",
     "multer": "^1.4.5-lts.1",
-    "sqlite": "^5.1.1"
+    "sql.js": "^1.11.0"
   }
 }</textarea>
 </div>
@@ -968,25 +968,91 @@
 
 <div class="section" id="b-db">
 <h2>Backend: database.js</h2>
-<p><strong>Plain SQLite</strong> file <code>grocery.db</code> next to <code>server.js</code>. The <strong><code>sqlite</code></strong> package gives <code>await db.all()</code>, <code>await db.get()</code>, <code>await db.run()</code>. <code>open()</code> needs one constructor passed as <code>driver</code> (see snippet — that is the standard <code>sqlite</code> setup, not <code>better-sqlite3</code>).</p>
+<p><strong>Plain SQLite</strong> file <code>grocery.db</code> next to <code>server.js</code>. <strong><code>sql.js</code></strong> holds the DB in memory and loads/saves the file; the small facade below exposes the same <code>await db.all()</code>, <code>await db.get()</code>, and <code>await db.run()</code> shape your routes already use. After each <code>run()</code>, read <code>last_insert_rowid()</code> <em>before</em> writing the file — <code>export()</code> resets that value on the connection.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">backend/database.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="98">// Plain SQLite on disk — grocery.db. Async API via npm package `sqlite` (not better-sqlite3).
+<textarea readonly rows="158">// Plain SQLite file (grocery.db): SQLite engine via sql.js (WASM).
 const path = require('path');
-const { open } = require('sqlite');
-const SqliteBinding = require('sqlite3').Database;
+const fs = require('fs');
+const initSqlJs = require('sql.js');
 
 const DB_PATH = path.join(__dirname, 'grocery.db');
 
+let rawDb;
 let db;
 
+function saveToDisk() {
+  const data = rawDb.export();
+  fs.writeFileSync(DB_PATH, Buffer.from(data));
+}
+
+function scalar(sql) {
+  const res = rawDb.exec(sql);
+  if (!res.length || !res[0].values || !res[0].values.length) return 0;
+  return res[0].values[0][0];
+}
+
+function bindIfNeeded(stmt, params) {
+  if (params && params.length) stmt.bind(params);
+}
+
+function createApi() {
+  return {
+    async exec(sql) {
+      rawDb.exec(sql);
+      saveToDisk();
+    },
+    async all(sql, params = []) {
+      const stmt = rawDb.prepare(sql);
+      try {
+        bindIfNeeded(stmt, params);
+        const rows = [];
+        while (stmt.step()) {
+          rows.push(stmt.getAsObject());
+        }
+        return rows;
+      } finally {
+        stmt.free();
+      }
+    },
+    async get(sql, params = []) {
+      const stmt = rawDb.prepare(sql);
+      try {
+        bindIfNeeded(stmt, params);
+        if (!stmt.step()) return undefined;
+        return stmt.getAsObject();
+      } finally {
+        stmt.free();
+      }
+    },
+    async run(sql, params = []) {
+      const stmt = rawDb.prepare(sql);
+      try {
+        bindIfNeeded(stmt, params);
+        stmt.step();
+      } finally {
+        stmt.free();
+      }
+      // Must read these before saveToDisk(): export() resets last_insert_rowid on the connection.
+      const lastID = Number(scalar('SELECT last_insert_rowid()'));
+      const changes = Number(scalar('SELECT changes()'));
+      saveToDisk();
+      return { lastID, changes };
+    }
+  };
+}
+
 async function initDatabase() {
-  db = await open({
-    filename: DB_PATH,
-    driver: SqliteBinding
-  });
-  await db.exec('PRAGMA journal_mode = WAL;');
-  await db.exec(`
+  const SQL = await initSqlJs();
+  if (fs.existsSync(DB_PATH)) {
+    rawDb = new SQL.Database(fs.readFileSync(DB_PATH));
+  } else {
+    rawDb = new SQL.Database();
+  }
+
+  rawDb.exec(`
+    PRAGMA foreign_keys = ON;
+
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
@@ -1052,6 +1118,8 @@ async function initDatabase() {
     );
   `);
 
+  saveToDisk();
+  db = createApi();
   return db;
 }
 
@@ -1143,7 +1211,7 @@ app.use(express.json());
 
 <div class="section" id="b-products">
 <h2>Backend: routes/products.js</h2>
-<p>REST API routes for products (async handlers). Uses <code>await db.all()</code> / <code>await db.get()</code> from the <code>sqlite</code> package. Supports filtering by category, searching by name, categories list, deals JOIN, and single product by ID.</p>
+<p>REST API routes for products (async handlers). Uses <code>await db.all()</code> / <code>await db.get()</code> from <code>database.js</code>. Supports filtering by category, searching by name, categories list, deals JOIN, and single product by ID.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">backend/routes/products.js</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
 <textarea readonly rows="70">const express = require('express');
@@ -1572,26 +1640,17 @@ module.exports = router;</textarea>
 <!-- ==================== FRONTEND SETUP ==================== -->
 <div class="section" id="f-pkg">
 <h2>Frontend: package.json</h2>
-<p>React app dependencies. Uses react-router-dom for page navigation and react-scripts for the dev server and build tooling.</p>
+<p>React app dependencies. The UI code itself only needs <code>react</code>, <code>react-dom</code>, and <code>react-router-dom</code>; keep whatever dev/build scripts your chosen starter already provides.</p>
 <div class="file-block">
 <div class="file-header"><span class="file-path">frontend/package.json</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-<textarea readonly rows="17">{
+<textarea readonly rows="11">{
   "name": "shop-frontend",
   "version": "1.0.0",
   "private": true,
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.21.0",
-    "react-scripts": "5.0.1"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build"
-  },
-  "browserslist": {
-    "production": [">0.2%", "not dead", "not op_mini all"],
-    "development": ["last 1 chrome version", "last 1 firefox version", "last 1 safari version"]
+    "react-router-dom": "^6.21.0"
   }
 }</textarea>
 </div>
