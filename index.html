@@ -606,6 +606,12 @@
 #secret-guide .folder-tree{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:16px 20px;font-family:Consolas,monospace;font-size:.82rem;line-height:1.8;white-space:pre;margin:12px 0;color:#334155}
 #secret-guide .changed-tag{display:inline-block;background:#fbbf24;color:#78350f;font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:8px;vertical-align:middle;letter-spacing:.03em}
 #secret-guide .new-tag{display:inline-block;background:#34d399;color:#064e3b;font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:8px;vertical-align:middle;letter-spacing:.03em}
+#secret-guide .test-log-wrap{overflow-x:auto;margin:16px 0;border:1px solid #e2e8f0;border-radius:10px;background:#fff}
+#secret-guide table.test-log-table{width:100%;border-collapse:collapse;font-size:.82rem;line-height:1.45}
+#secret-guide table.test-log-table th{background:#f1f5f9;color:#0f172a;text-align:left;padding:10px 12px;border-bottom:2px solid #e2e8f0;font-weight:600;white-space:nowrap}
+#secret-guide table.test-log-table td{padding:10px 12px;border-bottom:1px solid #e2e8f0;vertical-align:top;color:#334155}
+#secret-guide table.test-log-table tr:last-child td{border-bottom:none}
+#secret-guide table.test-log-table td.placeholder{color:#94a3b8;font-style:italic}
 @media(max-width:900px){#secret-guide .sidebar{display:none}#secret-guide .main{margin-left:0;padding:24px 16px}}
   </style>
 </head>
@@ -825,6 +831,8 @@
 <a href="#structure">Project Structure</a>
 <a href="#commands">Setup Commands</a>
 <a href="#vagrant">Vagrant (VM)</a>
+<h3>Coursework</h3>
+<a href="#test-log">Test log</a>
 <h3>Backend</h3>
 <a href="#b-pkg">package.json</a>
 <a href="#b-db">database.js</a>
@@ -4279,6 +4287,119 @@ function Admin() {
 
 export default Admin;</textarea>
 </div>
+</div>
+
+<div class="section" id="test-log">
+<h2>Website test log</h2>
+<p>Use this table for <strong>evidence of testing</strong> (screenshots or short notes in <strong>Comments</strong> help). Run the API on port <strong>5000</strong> and the shop on your frontend port. Fill in <strong>Actual outcome</strong> and <strong>Comments</strong> while you test — keep each row honest (pass/fail).</p>
+<div class="tip"><strong>Tip:</strong> Repeat core tests after you change code. If something fails, note the exact error message, browser, and step in <strong>Comments</strong>.</div>
+<div class="test-log-wrap">
+<table class="test-log-table">
+<thead>
+<tr>
+<th scope="col">Description of test</th>
+<th scope="col">Test data (if any)</th>
+<th scope="col">Expected outcome</th>
+<th scope="col">Actual outcome</th>
+<th scope="col">Comments</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API root responds</td>
+<td>GET <code>http://localhost:5000/</code></td>
+<td>HTTP 200, JSON includes <code>ok: true</code></td>
+<td class="placeholder">—</td>
+<td class="placeholder">—</td>
+</tr>
+<tr>
+<td>Products list after seed</td>
+<td>Run <code>node seed.js</code> then GET <code>/api/products</code></td>
+<td>HTTP 200, empty array <code>[]</code> until you add stock</td>
+<td class="placeholder">—</td>
+<td class="placeholder">—</td>
+</tr>
+<tr>
+<td>Register new user</td>
+<td>Name, unique email, password in request body</td>
+<td>HTTP 201, returns user fields (no password in response)</td>
+<td class="placeholder">—</td>
+<td class="placeholder">—</td>
+</tr>
+<tr>
+<td>Register rejects duplicate email</td>
+<td>Same email twice</td>
+<td>HTTP 400, error message about email</td>
+<td class="placeholder">—</td>
+<td class="placeholder">—</td>
+</tr>
+<tr>
+<td>Login with valid credentials</td>
+<td>Email and password from registration</td>
+<td>HTTP 200, returns user id, name, email, reward_points</td>
+<td class="placeholder">—</td>
+<td class="placeholder">—</td>
+</tr>
+<tr>
+<td>Login fails with wrong password</td>
+<td>Correct email, wrong password</td>
+<td>HTTP 401</td>
+<td class="placeholder">—</td>
+<td class="placeholder">—</td>
+</tr>
+<tr>
+<td>Admin: list products</td>
+<td>GET <code>/api/admin/products</code></td>
+<td>HTTP 200, array (empty or with rows you added)</td>
+<td class="placeholder">—</td>
+<td class="placeholder">—</td>
+</tr>
+<tr>
+<td>Admin: create product</td>
+<td>Name, price, category (and optional image URL, stock)</td>
+<td>HTTP 201, new product appears in list with an <code>id</code></td>
+<td class="placeholder">—</td>
+<td class="placeholder">—</td>
+</tr>
+<tr>
+<td>Shop: products page shows data</td>
+<td>Open <code>/products</code> in the browser</td>
+<td>Products you added appear (or filters work if you test them)</td>
+<td class="placeholder">—</td>
+<td class="placeholder">—</td>
+</tr>
+<tr>
+<td>Place order (happy path)</td>
+<td>Logged-in user, cart items, order type (e.g. delivery/collection)</td>
+<td>HTTP 201, returns order <code>id</code> and total; stock/DB updated as designed</td>
+<td class="placeholder">—</td>
+<td class="placeholder">—</td>
+</tr>
+<tr>
+<td>Order history shows the new order</td>
+<td>Same user as the order</td>
+<td>GET user orders returns the new order (and line items if implemented)</td>
+<td class="placeholder">—</td>
+<td class="placeholder">—</td>
+</tr>
+<tr>
+<td>Rewards points change after order</td>
+<td>User with enough activity for points</td>
+<td>Points increase (or redeem flow works if you test it)</td>
+<td class="placeholder">—</td>
+<td class="placeholder">—</td>
+</tr>
+<tr>
+<td>Negative or edge case (your choice)</td>
+<td class="placeholder">e.g. empty cart, invalid product id, out of stock</td>
+<td>Sensible error status/message, no crash</td>
+<td class="placeholder">—</td>
+<td class="placeholder">Describe the edge case here</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p style="font-size:.88rem;color:#64748b;margin-top:12px">Add extra rows if your brief requires specific features (e.g. file upload, deals, delivery address validation).</p>
 </div>
 
 </div><!-- end main -->
